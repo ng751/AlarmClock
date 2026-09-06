@@ -1,3 +1,0 @@
-/* This script contains the AlarmObject class, which is used to represent an alarm in the alarm clock program. 
- * It includes member variables such as...
-*/
