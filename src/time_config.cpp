@@ -1,6 +1,6 @@
 /* This script is designed to handle the time and date data that is manually entered by the user, 
  * including hours, minutes, and AM or PM, day, month, year, and day of the week.
- *
+ * This program also includes functions such as 12-24 hour formatting, DST configuration, and day of the week calculation
  */
 
 #include <RTClib.h>

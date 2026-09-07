@@ -5,6 +5,7 @@
 
 void setup() {
     Serial.begin(115200);
+    
     delay(200);
     initInputManager();
     Wire.begin(I2C_SDA, I2C_SCL);
@@ -18,16 +19,16 @@ void setup() {
 
 void loop() {
    if (inputPressed(BTN_RST)) {
-        displayData("Restarting", 1, 0, 0, true);
+        displayString("Restarting", 1, 0, 0, true);
         ESP.restart();
     } else if (inputPressed(BTN_FORMAT)) {
-        displayData("Format Button", 1, 0, 0, true);
+        displayString("Format Button", 1, 0, 0, true);
     } else if (inputPressed(BTN_DST)) {
-        displayData("DST Button", 1, 0, 0, true);
+        displayString("DST Button", 1, 0, 0, true);
     } else if (inputPressed(BTN_SNOOZE_SILENCE)) {
-        displayData("Snooze/Silence Button", 1, 0, 0, true);
+        displayString("Snooze/Silence Button", 1, 0, 0, true);
     } else if (inputPressed(BTN_SET_ALARM)) {
-        displayData("Set Alarm Button", 1, 0, 0, true);
+        displayString("Set Alarm Button", 1, 0, 0, true);
     } else {
         Serial.println("No button pressed");
         displayClear();

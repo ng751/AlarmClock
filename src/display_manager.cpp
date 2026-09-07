@@ -25,7 +25,7 @@ void displayClear() {
     display.display();
 }
 
-void displayData(String message, int textSize, int cursorX, int cursorY, bool clearDisplay) {
+void displayString(String message, int textSize, int cursorX, int cursorY, bool clearDisplay) {
     if (clearDisplay) {
         display.clearDisplay();
     }

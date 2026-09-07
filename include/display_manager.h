@@ -11,7 +11,9 @@
 #define SCREEN_HEIGHT 64
 
 bool displayFound();
-void displayData(String message, int textSize, int cursorX, int cursorY, bool clearDisplay); 
+void displayString(String message, int textSize, int cursorX, int cursorY, bool clearDisplay); 
 void displayClear();
+//add blinking function for alarm
+//add function to display a selectable list with arguments that include # of items and the list of items 
 
 #endif // DISPLAY_MANAGER_H
