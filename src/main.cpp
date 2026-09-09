@@ -3,6 +3,8 @@
 #include <input_manager.h>
 #include <display_manager.h>
 
+const int buzzer = 10;
+
 void setup() {
     Serial.begin(115200);
     
@@ -10,11 +12,23 @@ void setup() {
     initInputManager();
     Wire.begin(I2C_SDA, I2C_SCL);
 
+    pinMode(buzzer, OUTPUT);
+
+
     delay(1000);
 
     displayFound();
 
+
+
+    
+
     displayClear();
+
+    delay(200);
+
+        displayString("test ", 2, 0, 0, false);
+
 }   
 
 void loop() {
@@ -23,6 +37,7 @@ void loop() {
         ESP.restart();
     } else if (inputPressed(BTN_FORMAT)) {
         displayString("Format Button", 1, 0, 0, true);
+        tone(buzzer, 500, 500); // Play a tone at 1000 Hz for 500 ms
     } else if (inputPressed(BTN_DST)) {
         displayString("DST Button", 1, 0, 0, true);
     } else if (inputPressed(BTN_SNOOZE_SILENCE)) {
@@ -31,7 +46,18 @@ void loop() {
         displayString("Set Alarm Button", 1, 0, 0, true);
     } else {
         Serial.println("No button pressed");
-        displayClear();
+        noTone(buzzer); 
+        //displayClear();
     }
-    delay(50);
+    int value = analogRead(3);
+
+    if (value < 1000) { 
+        displayDim(true);
+   } else if (value >= 1000) {
+        displayDim(false);
+
+    }
+    
+
+
 }
