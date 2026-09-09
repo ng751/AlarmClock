@@ -60,3 +60,7 @@ void displayDim(bool dim) { //prototype for the dimming feature. this will requi
         dimmed = false;
     }
 }
+
+void flashDisplay() {
+    //this function will flash the display for when the alarm goes off
+}

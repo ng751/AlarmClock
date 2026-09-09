@@ -11,6 +11,7 @@ int counter = 0;
 int DT_current;
 int DT_previous;
 int Photoresistor_value;
+bool override;
 
 void initInputManager() {
     // Loop through the structures and extract the exact pin numbers
@@ -35,14 +36,24 @@ void encoderDirection(bool inMenu) { //by default it changes screen brightness, 
     CLK_current = digitalRead(INPUTS[ENCODER_CLK].pin);
    // DT_previous = digitalRead(ENCODER_DT)
 
-   if (CLK_current == LOW && CLK_previous == HIGH) {
 
-     if (digitalRead(INPUTS[ENCODER_DT].pin) != CLK_current) {
+
+   if (CLK_current == LOW && CLK_previous == HIGH) { //very quick prototype of a possible manual dimming feature
+    override = true;
+     if (digitalRead(INPUTS[ENCODER_DT].pin) != CLK_current) { 
         counter++;
-        displayString("CCW", 1, 0, 0, true);
+        displayString("CCW", 4, 0, 0, true);
+        if (!inMenu) {
+            Serial.println("dim");
+            displayDim(true);
+        }
      } else {
         counter--;
-        displayString("CW", 1, 0, 0, true);
+        displayString("CW", 4, 0, 0, true);
+         if (!inMenu) {
+            Serial.println("illuminate");
+            displayDim(false);
+        }
      }
    }  
    CLK_previous = CLK_current;
@@ -51,11 +62,14 @@ void encoderDirection(bool inMenu) { //by default it changes screen brightness, 
 void automaticDimming() {
     Photoresistor_value = analogRead(3); //reads photoresistor input
 
-    if (Photoresistor_value < 1000) { //automatic dimming, this can be cleaned up and probably mov
-        displayDim(true);
-    } else if (Photoresistor_value >= 1000) {
-        displayDim(false);
-    }
+    
+        if (Photoresistor_value < 1000) { //automatic dimming, this can be cleaned up and probably mov
+            displayDim(true);
+            override = false;
+       } else if (Photoresistor_value >= 1000 && (override == false)) {
+           displayDim(false);
+       } 
+
 }
 
 void manualDimming(bool dim) {

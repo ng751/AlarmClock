@@ -14,7 +14,8 @@ bool displayFound();
 void displayString(String message, int textSize, int cursorX, int cursorY, bool clearDisplay); 
 void displayClear();
 void displayDim(bool dim);
-//add blinking function for alarm
+void flashDisplay();
+
 //add function to display a selectable list with arguments that include # of items and the list of items 
 
 #endif // DISPLAY_MANAGER_H

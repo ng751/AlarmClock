@@ -34,7 +34,7 @@ char dayOfTheWeek(const std::tm& displayTime) {
     }
 }
 
-void dstConfigure(bool dstEnabled) {
+void dstConfigure(bool dstEnabled) { // adds or removes an hour to or from the display time
     if (dstEnabled) {
         
     } else {
