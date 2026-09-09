@@ -12,7 +12,7 @@
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
-bool displayFound() {
+bool displayFound() { //this function checks to make sure the display exists
     if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
         Serial.println(F("SSD1306 allocation failed"));
         for (;;); // Infinitely loop if display is not found
@@ -22,7 +22,7 @@ bool displayFound() {
     return true;
 }
 
-void displayClear() {
+void displayClear() { //this function clears the display
     display.clearDisplay();
     display.display();
 }
@@ -33,10 +33,6 @@ void displayString(String message, int textSize, int cursorX, int cursorY, bool 
     }
     display.setTextSize(textSize);
     display.setTextColor(SSD1306_WHITE);
-     display.ssd1306_command(SSD1306_SETCONTRAST);
-     display.ssd1306_command(0x00);
-     display.ssd1306_command(0xD9);
-     display.ssd1306_command(0x11);
     display.setCursor(cursorX, cursorY);
     display.println(message);
     display.display();
@@ -46,20 +42,20 @@ void displayString(String message, int textSize, int cursorX, int cursorY, bool 
 bool dimmed = false;
 void displayDim(bool dim) { //prototype for the dimming feature. this will require much discussion
     if (dim && !dimmed)  {
-        display.ssd1306_command(SSD1306_SETCONTRAST);
+        display.ssd1306_command(SSD1306_SETCONTRAST); //these lines dim the OLED display
         display.ssd1306_command(1);
-       // display.ssd1306_command(0xD9); //these four lines may might it slightly dimmer. i sincerely cannot tell
+
+       // display.ssd1306_command(0xD9); //these four lines may make it slightly dimmer. i sincerely cannot tell
        // display.ssd1306_command(0x11); 
        // display.ssd1306_command(0xDB); 
        // display.ssd1306_command(0x00); 
 
-        Serial.println("dimmed");
         display.display();
         dimmed = true;
     } else if (!dim && dimmed) {
-        display.ssd1306_command(SSD1306_SETCONTRAST);
+        display.ssd1306_command(SSD1306_SETCONTRAST); //these lines illuminate the oled display
         display.ssd1306_command(255);
-        Serial.println("bright");
+
         display.display();
         dimmed = false;
     }

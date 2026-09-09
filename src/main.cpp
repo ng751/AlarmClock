@@ -10,6 +10,7 @@ void setup() {
     
     delay(200);
     initInputManager();
+    encoderInit();
     Wire.begin(I2C_SDA, I2C_SCL);
 
     pinMode(buzzer, OUTPUT);
@@ -20,43 +21,39 @@ void setup() {
     displayFound();
 
 
-
+    //attachInterrupt(digitalPinToInterrupt(ENCODER_CLK), encoderDirection, CHANGE); //these are meant to interrupt whatever function is running if a change is detected. 
+    //attachInterrupt(digitalPinToInterrupt(ENCODER_DT), encoderDirection, CHANGE);  dont think its needed but keeping for now
     
 
     displayClear();
 
     delay(200);
 
-        displayString("test ", 2, 0, 0, false);
 
 }   
 
 void loop() {
-   if (inputPressed(BTN_RST)) {
+
+    encoderDirection(false); //if menu selection is taking place, this will be true and the encoder will act differently. no conditional yet so just false for now
+    automaticDimming(); 
+
+   if (inputPressed(BTN_RST)) { //implement debounce for inputs
         displayString("Restarting", 1, 0, 0, true);
         ESP.restart();
     } else if (inputPressed(BTN_FORMAT)) {
         displayString("Format Button", 1, 0, 0, true);
-        tone(buzzer, 500, 500); // Play a tone at 1000 Hz for 500 ms
     } else if (inputPressed(BTN_DST)) {
         displayString("DST Button", 1, 0, 0, true);
     } else if (inputPressed(BTN_SNOOZE_SILENCE)) {
         displayString("Snooze/Silence Button", 1, 0, 0, true);
     } else if (inputPressed(BTN_SET_ALARM)) {
         displayString("Set Alarm Button", 1, 0, 0, true);
+    } else if (inputPressed(ENCODER_SWITCH)) {
+      displayString("Select", 1, 0, 0, true);
     } else {
-        Serial.println("No button pressed");
-        noTone(buzzer); 
-        //displayClear();
+        //do nothing for now
     }
-    int value = analogRead(3);
 
-    if (value < 1000) { 
-        displayDim(true);
-   } else if (value >= 1000) {
-        displayDim(false);
-
-    }
     
 
 

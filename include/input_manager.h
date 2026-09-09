@@ -9,6 +9,9 @@ enum InputIndex {
     BTN_DST,
     BTN_SNOOZE_SILENCE,
     BTN_SET_ALARM,
+    ENCODER_SWITCH,
+    ENCODER_CLK,
+    ENCODER_DT,
     NUM_INPUTS  // Equal to 5
 };
 
@@ -25,9 +28,16 @@ inline constexpr InputMap INPUTS[NUM_INPUTS] = {
     { BTN_DST,             7 },
     { BTN_SNOOZE_SILENCE,  6 },
     { BTN_SET_ALARM,       5 },
+    { ENCODER_SWITCH,     16 },
+    { ENCODER_CLK,        18 },
+    { ENCODER_DT,         17 }
 };
 
 void initInputManager();
 bool inputPressed(InputIndex btn);
+void encoderInit();
+void encoderDirection(bool inMenu);
+//int retrieveEncoderDirection();
+void automaticDimming();
 
 #endif // INPUT_MANAGER_H
