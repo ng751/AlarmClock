@@ -7,7 +7,6 @@
 #include <time_config.h>
 #include <display_manager.h>
 
-RTC_DS3231 rtc;
 
 char dayOfTheWeek(const std::tm& displayTime) {
     // Calculate the day of the week using Zeller's Congruence
@@ -37,10 +36,16 @@ char dayOfTheWeek(const std::tm& displayTime) {
     }
 }
 
-DateTime writeUserTime(int year, int month, int day, int hour, int minute, int second) {
+void writeUserTime(tm userTime) {
     //this function formats user entered data in a DateTime structure
-
-    return DateTime(year, month, day, hour, minute, second);
+    rtc.adjust(DateTime(
+        userTime.tm_year + 1900,
+        userTime.tm_mon + 1,
+        userTime.tm_mday,
+        userTime.tm_hour,
+        userTime.tm_min,
+        userTime.tm_sec
+    ));
 }
 
 void rtcFound() {

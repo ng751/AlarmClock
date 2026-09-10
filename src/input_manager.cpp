@@ -3,6 +3,7 @@
 
 #include <input_manager.h>
 #include <display_manager.h>
+#include <alarm.h>
 
 int CLK_current; //initalizes variables that will hold the state of both encoder_clk and encoder_dt
 int CLK_previous;
@@ -47,22 +48,21 @@ void encoderDirection() {
     bool updateDisplay = false; //dont update since nothing has happened
 
     if (currentUIState != STATE_DEFAULT && currentUIState != STATE_SCROLL_MENU) {
+        //  Serial.print(asctime(&editBuffer)); 
         if (isClockwise) {
-            if (currentUIState == STATE_EDIT_YEAR)  userYear++;
-            if (currentUIState == STATE_EDIT_MONTH) { userMonth++; if(userMonth > 12) userMonth = 1; }
-            if (currentUIState == STATE_EDIT_DAY)   { userDay++;   if(userDay > 31)   userDay = 1; }
-            if (currentUIState == STATE_EDIT_HOUR)  { userHour++;  if(userHour > 23)  userHour = 0; }
-            if (currentUIState == STATE_EDIT_MINUTES)   { userMin++;   if(userMin > 59)   userMin = 0; }
-            if (currentUIState == STATE_EDIT_SECONDS)   { userSec--;   if(userMin < 0)   userMin = 59; }
-            if (currentUIState == STATE_EDIT_AMPM)   { userAMPM;   if(userAMPM = "AM")   userAMPM = "PM"; }
+         if (currentUIState == STATE_EDIT_YEAR)  editBuffer.tm_year++;
+         if (currentUIState == STATE_EDIT_MONTH) { editBuffer.tm_mon++; if(editBuffer.tm_mon > 11) editBuffer.tm_mon = 0; }
+         if (currentUIState == STATE_EDIT_DAY)   { editBuffer.tm_mday++; if(editBuffer.tm_mday > 31) editBuffer.tm_mday = 1; }
+         if (currentUIState == STATE_EDIT_HOUR)  { editBuffer.tm_hour++; if(editBuffer.tm_hour > 23) editBuffer.tm_hour = 0; }
+         if (currentUIState == STATE_EDIT_MINUTES)   { editBuffer.tm_min++;  if(editBuffer.tm_min > 59)  editBuffer.tm_min = 0; }
+            if (currentUIState == STATE_EDIT_SECONDS)   { editBuffer.tm_sec++;   if(editBuffer.tm_sec > 59)   editBuffer.tm_sec = 0; }
         } else {
-            if (currentUIState == STATE_EDIT_YEAR)  userYear--;
-            if (currentUIState == STATE_EDIT_MONTH) { userMonth--; if(userMonth < 1)  userMonth = 12; }
-            if (currentUIState == STATE_EDIT_DAY)   { userDay--;   if(userDay < 1)   userDay = 31; }
-            if (currentUIState == STATE_EDIT_HOUR)  { userHour--;  if(userHour < 0)   userHour = 23; }
-            if (currentUIState == STATE_EDIT_MINUTES)   { userMin--;   if(userMin < 0)   userMin = 59; }
-            if (currentUIState == STATE_EDIT_SECONDS)   { userSec--;   if(userMin < 0)   userMin = 59; }
-             if (currentUIState == STATE_EDIT_AMPM)   { userAMPM;   if(userAMPM = "PM")   userAMPM = "AM"; }
+            if (currentUIState == STATE_EDIT_YEAR)  editBuffer.tm_year--;
+            if (currentUIState == STATE_EDIT_MONTH) { editBuffer.tm_mon--; if(editBuffer.tm_mon < 1)  editBuffer.tm_mon = 12; }
+            if (currentUIState == STATE_EDIT_DAY)   { editBuffer.tm_mday--;   if(editBuffer.tm_mday < 1)   editBuffer.tm_mday = 31; }
+            if (currentUIState == STATE_EDIT_HOUR)  { editBuffer.tm_hour--;  if(editBuffer.tm_mday < 0)   editBuffer.tm_mday = 23; }
+            if (currentUIState == STATE_EDIT_MINUTES)   { editBuffer.tm_min--;   if(editBuffer.tm_min < 0)   editBuffer.tm_min = 59; }
+            if (currentUIState == STATE_EDIT_SECONDS)   { editBuffer.tm_sec--;   if(editBuffer.tm_sec < 0)   editBuffer.tm_sec = 59; }
         }
 
     }
@@ -109,7 +109,6 @@ void encoderDirection() {
 
 void automaticDimming() {
     Photoresistor_value = analogRead(3); //reads photoresistor input
-    Serial.println(Photoresistor_value);
     if (Photoresistor_value < 1000) { //automatic dimming, this can be cleaned up
         displayDim(true, false);
         override = false; //override waits until the user covers the photoresistor again to reactivate its capabilities

@@ -5,6 +5,10 @@
  #include <Arduino.h>
  #include <display_manager.h>
  #include <input_manager.h>
+ #include <alarm.h>
+ #include <time_config.h>
+
+
 
  void buzzerSound() {
     //this will be responsible for activating the alarm at the correct time
@@ -31,47 +35,52 @@
  }
 
  void changeDateTime() {
-    while(!digitalRead(ENCODER_SWITCH)); // Pause until user lets go of the button
+    //while(!digitalRead(ENCODER_SWITCH)); // Pause until user lets go of the button
 
-    // AUTOMATIC PROGRESSION VIEW
+
     switch (currentUIState) {
       
-      case STATE_DEFAULT:
-        // Clicking from the main screen jumps straight into the wizard
-        currentUIState = STATE_EDIT_YEAR;
-        break;
-        
       case STATE_EDIT_YEAR:
         // Year is locked in! Automatically shift focus to Month
+        Serial.println("here 2");
         currentUIState = STATE_EDIT_MONTH;
         break;
         
       case STATE_EDIT_MONTH:
-        // Month is locked in! Automatically shift focus to Day
+      Serial.println("here 3");
+    
         currentUIState = STATE_EDIT_DAY;
         break;
         
       case STATE_EDIT_DAY:
-        // Day is locked in! Automatically shift focus to Hours
+        
         currentUIState = STATE_EDIT_HOUR;
         break;
         
       case STATE_EDIT_HOUR:
-        // Hour is locked in! Automatically shift focus to Minutes
+    
         currentUIState = STATE_EDIT_MINUTES;
         break;
         
       case STATE_EDIT_MINUTES:
-        // Minutes are set! Everything is completely finished.
+         Serial.println("here 6");
+      
         currentUIState = STATE_EDIT_SECONDS;
-
-        // --- OPTIONAL: Sync changes to an external RTC chip here if you have one ---
         // rtc.adjust(DateTime(userYear, userMonth, userDay, userHour, userMin, 0));
       case STATE_EDIT_SECONDS:
-        currentUIState = STATE_EDIT_AMPM;
-      case STATE_EDIT_AMPM:
-         
-        Serial.println("Time & Date configuration saved successfully!");
+        systemTime = editBuffer;
+
+        mktime(&systemTime);
+
+        writeUserTime(systemTime);
+
+        Serial.println("time and date saved");
+        Serial.println("Time and date saved:");
+  Serial.print("Year: ");  Serial.println(systemTime.tm_year + 1900);
+  Serial.print("Month: "); Serial.println(systemTime.tm_mon + 1);
+  Serial.print("Day: ");   Serial.println(systemTime.tm_mday);
+  Serial.print("Hour: ");  Serial.println(systemTime.tm_hour);
+  Serial.print("Min: ");   Serial.println(systemTime.tm_min);
         currentUIState = STATE_DEFAULT; // Automatically pop back out to the main screen
         break;
     }

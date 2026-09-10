@@ -5,7 +5,6 @@
 
 #define I2C_SDA 8
 #define I2C_SCL 9
-#define SERIAL = 0x3C
 
 #define SCREEN_WIDTH 128 
 #define SCREEN_HEIGHT 64

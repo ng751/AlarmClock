@@ -3,6 +3,9 @@
 
 #include <Arduino.h>
 
+extern tm systemTime;
+extern tm editBuffer;
+
 void buzzerSound();
 void buzzerOptions();
 void snooze();
