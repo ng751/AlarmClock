@@ -20,3 +20,7 @@
  void silence() {
     //this will silence the buzzer altogether
  }
+
+ void setAlarm() {
+   //this function runs when the set alarm button is pressed, each character i
+ }

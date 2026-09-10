@@ -2,18 +2,27 @@
 #include <Wire.h>
 #include <input_manager.h>
 #include <display_manager.h>
+#include <time_config.h>
+#include <RTClib.h>
 
+UIState currentUIState;
 //const int buzzer = 10;
+
+RTC_DS3231 rtc1;
 
 void setup() {
     Serial.begin(115200);
     
-    delay(200);
+    currentUIState = STATE_DEFAULT;
+
+   // delay(200);
 
     initInputManager(); // initiate each input
+
     encoderInit(); // read the current rotary encoder value to set up the encoderDirection function
 
     Wire.begin(I2C_SDA, I2C_SCL);
+    Wire.setClock(400000);
 
     //pinMode(buzzer, OUTPUT);
 
@@ -28,16 +37,21 @@ void setup() {
 
     displayClear(); // clear the display
 
-    delay(200);
+    displayString("test", 2, 0, 0, true);
+
+    //writeUserTime();
+
+    //delay(200);
 
 
 }   
 
 void loop() {
 
-    encoderDirection(false); // if menu selection is taking place, the argument will be true and the encoder will act differently. no conditional yet so just false for now
-
     automaticDimming(); // function that handles automatic dimming; always checking for change in input
+
+    encoderDirection(); // if menu selection is taking place, the argument will be true and the encoder will act differently. no conditional yet so just false for now
+
 
    if (inputPressed(BTN_RST)) { //implement debounce for inputs where needed
         displayString("Restarting", 1, 0, 0, true);
@@ -50,13 +64,18 @@ void loop() {
         displayString("Snooze/Silence Button", 1, 0, 0, true);
     } else if (inputPressed(BTN_SET_ALARM)) {
         displayString("Set Alarm Button", 1, 0, 0, true);
+        //rtc1.adjust(writeUserTime());
     } else if (inputPressed(ENCODER_SWITCH)) {
       displayString("Select", 1, 0, 0, true);
     } else {
         //do nothing for now
     }
 
-    
-
+    //char buffer[] = "YYYY/MM/DD at hh:mm:ss";
+      
+     // Serial.println("\n--- Time Received! ---");
+     // Serial.print("You entered: ");
+    //  Serial.println(writeUserTime().toString(buffer));
+    //  displayString(writeUserTime().toString(buffer), 2, 0, 0, true);
 
 }

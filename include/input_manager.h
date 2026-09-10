@@ -36,7 +36,7 @@ inline constexpr InputMap INPUTS[NUM_INPUTS] = {
 void initInputManager();
 bool inputPressed(InputIndex btn);
 void encoderInit();
-void encoderDirection(bool inMenu);
+void encoderDirection();
 //int retrieveEncoderDirection();
 void automaticDimming();
 

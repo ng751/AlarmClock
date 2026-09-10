@@ -8,5 +8,6 @@ void buzzerOptions();
 void snooze();
 void snoozeConfigurations();
 void silence();
+void setAlarm();
 
 #endif // ALARM_H

@@ -5,6 +5,9 @@
 
 #include <RTClib.h>
 #include <time_config.h>
+#include <display_manager.h>
+
+RTC_DS3231 rtc;
 
 char dayOfTheWeek(const std::tm& displayTime) {
     // Calculate the day of the week using Zeller's Congruence
@@ -32,6 +35,29 @@ char dayOfTheWeek(const std::tm& displayTime) {
         case 6: return 'F'; // Friday
         default: return '?'; // Invalid value
     }
+}
+
+DateTime writeUserTime(int year, int month, int day, int hour, int minute, int second) {
+    //this function formats user entered data in a DateTime structure
+
+    return DateTime(year, month, day, hour, minute, second);
+}
+
+void rtcFound() {
+    if (! rtc.begin()) {
+        Serial.println("RTC not found");
+        Serial.flush();
+        for (;;); // Infinitely loop if rtc is not found
+    }
+}
+
+void formatTime() { //switches between 12 and 24 hours, will take time as argument
+
+}
+
+void displayTime() {
+   // displayString(UserTime(), 2, 0, 0 , true)
+   //this will display the user entered time
 }
 
 void dstConfigure(bool dstEnabled) { // adds or removes an hour to or from the display time

@@ -12,6 +12,8 @@ int DT_current;
 int DT_previous;
 int Photoresistor_value;
 bool override;
+bool updateDisplay;
+
 
 void initInputManager() {
     // Loop through the structures and extract the exact pin numbers
@@ -32,50 +34,74 @@ bool inputPressed(InputIndex btn) { //for buttons/switches. rotary encoder cw an
     }
 }
 
-void encoderDirection(bool inMenu) { //by default it changes screen brightness, if inMenu uis true it jumps into menu protocol
-    CLK_current = digitalRead(INPUTS[ENCODER_CLK].pin);
-   // DT_previous = digitalRead(ENCODER_DT)
+void encoderDirection() {
+  // read clk pin
+  CLK_current = digitalRead(INPUTS[ENCODER_CLK].pin); // Assuming your clock pin setup
 
-
-
-   if (CLK_current == LOW && CLK_previous == HIGH) { //very quick prototype of a possible manual dimming feature
+  if (CLK_current == LOW && CLK_previous == HIGH) {
     override = true;
-     if (digitalRead(INPUTS[ENCODER_DT].pin) != CLK_current) { 
-        counter++;
-        displayString("CCW", 4, 0, 0, true);
-        if (!inMenu) {
-            Serial.println("dim");
-            displayDim(true);
+    
+    // determine direction of the turn
+    bool isClockwise = (digitalRead(INPUTS[ENCODER_DT].pin) != CLK_current);
+    
+    bool updateDisplay = false; //dont update since nothing has happened
+
+    switch (currentUIState) {
+      
+      case STATE_DEFAULT:
+        // default screen, turning the knob dims or brightens the display
+        if (isClockwise) {
+          Serial.println("illuminate");
+          displayDim(false, true); // go backward toward full illumination (2 -> 1 -> 0)
+        } else {
+          Serial.println("dim");
+          displayDim(true, true);  // go further into dimming (0 -> 1 -> 2)
         }
-     } else {
-        counter--;
+        break;
+
+      case STATE_SCROLL_MENU:
+        // in a menu list
+        if (isClockwise) {
+          counter++; // scroll down
+          Serial.println("Menu: Scroll Down");
+        } else {
+          counter--; // to scroll up
+          Serial.println("Menu: Scroll Up");
+        }
+        updateDisplay = true; // Flag that the menu text needs to change
+        break;
+
+      case STATE_EDIT_VALUE:
+        // a number is being altered
+        if (isClockwise) {
+          Serial.println("Edit: Increase Value");
+        } else {
+          Serial.println("Edit: Decrease Value");
+        }
+        updateDisplay = true; // update display
+        break;
+    }
+
+    if (updateDisplay) {
+      if (isClockwise) {
         displayString("CW", 4, 0, 0, true);
-         if (!inMenu) {
-            Serial.println("illuminate");
-            displayDim(false);
-        }
-     }
-   }  
-   CLK_previous = CLK_current;
+      } else {
+        displayString("CCW", 4, 0, 0, true);
+      }
+    }
+  }
+  
+  CLK_previous = CLK_current;
 }
 
 void automaticDimming() {
     Photoresistor_value = analogRead(3); //reads photoresistor input
-
-    
-        if (Photoresistor_value < 1000) { //automatic dimming, this can be cleaned up and probably mov
-            displayDim(true);
-            override = false;
-       } else if (Photoresistor_value >= 1000 && (override == false)) {
-           displayDim(false);
-       } 
-
+    Serial.println(Photoresistor_value);
+    if (Photoresistor_value < 1000) { //automatic dimming, this can be cleaned up
+        displayDim(true, false);
+        override = false; //override waits until the user covers the photoresistor again to reactivate its capabilities
+    } else if (Photoresistor_value >= 1000 && (override == false)) {
+        displayDim(false, false);
+    } 
 }
 
-void manualDimming(bool dim) {
- 
-}
-
-//int retrieveEncoderDirection() {
-  //  return counter;
-//}
