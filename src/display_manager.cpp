@@ -8,8 +8,6 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-bool blinkOn;
-
 #define OLED_VCC_PIN 18
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
@@ -29,7 +27,7 @@ void displayClear() { //this function clears the display
     display.display();
 }
 
-void displayString(String message, int textSize, int cursorX, int cursorY, bool clearDisplay) { //functio to print a string to the oled with some parameters
+void displayString(String message, int textSize, int cursorX, int cursorY, bool clearDisplay) { //function to print a string to the oled with some parameters
     if (clearDisplay) {
         display.clearDisplay();
     }
@@ -46,29 +44,24 @@ bool screenOff = false;
 int dimState = 0; // Starts at 0 (Fully Illuminated)
 int oldState;
 
-void displayDim(bool dimFurther, bool isManual) { //prototype for the dimming feature. this will require much discussion
-    // Global variable to keep track of the current step
+void displayDim(bool dimFurther, bool isManual) { //prototype for the dimming featur
    oldState = dimState;
 
    if (isManual) {
-    // --- ENCODER CONTROL (Manual Override) ---
-    // Allows cycling through all 3 states: 0 <-> 1 <-> 2
     if (dimFurther) {
       dimState++; 
-      if (dimState > 2) dimState = 2; // Clamp at Off
+      if (dimState > 2) dimState = 2; // off stays off
     } else {
       dimState--;
-      if (dimState < 0) dimState = 0; // Clamp at Max Brightness
+      if (dimState < 0) dimState = 0; // max stays max
     }
   } 
   else {
-    // --- PHOTORESISTOR CONTROL (Automatic) ---
-    // Only allowed to touch states if the user hasn't forced the screen OFF (State 2)
     if (dimState != 2) { 
       if (dimFurther) {
-        dimState = 1; // Light sensor says it's dark -> Go to Dimmed
+        dimState = 1; // if photoresistor is dark then dim
       } else {
-        dimState = 0; // Light sensor says it's bright -> Go to Max Brightness
+        dimState = 0; // if photoresistor says its light then illuminate
       }
     }
   }
@@ -77,35 +70,29 @@ void displayDim(bool dimFurther, bool isManual) { //prototype for the dimming fe
   if (dimState != oldState) {
     switch (dimState) {
       
-      case 0: // DIMMED -> FULLY ILLUMINATED
-        display.ssd1306_command(SSD1306_DISPLAYON);     // Ensure screen is on
+      case 0: // DIMMED to FULLY ILLUMINATED
+        display.ssd1306_command(SSD1306_DISPLAYON);     // ensure screen is on
         display.ssd1306_command(SSD1306_SETCONTRAST); 
-        display.ssd1306_command(255);                    // Max brightness
+        display.ssd1306_command(255);                    // Mmax brightness
         Serial.println("State 0: Fully Illuminated");
         break;
 
-      case 1: // Moving from either Off or Fully Illuminated into DIMMED
-        display.ssd1306_command(SSD1306_DISPLAYON);     // Wake up if coming from Off
+      case 1: // Moving from either off or fully illuminated into dim
+        display.ssd1306_command(SSD1306_DISPLAYON);     // turn display back on if off
         display.ssd1306_command(SSD1306_SETCONTRAST); 
-        display.ssd1306_command(1);                      // Low brightness
+        display.ssd1306_command(1);                      // dimmed
         Serial.println("State 1: Dimmed");
         break;
 
-      case 2: // DIMMED -> OFF
-        display.ssd1306_command(SSD1306_DISPLAYOFF);    // Put display to sleep
+      case 2: // DIMMED to OFF
+        display.ssd1306_command(SSD1306_DISPLAYOFF);    // sleep mode
         Serial.println("State 2: Off");
         break;
     }
-    // Note: No display.display() here! The hardware handles these commands instantly.
   }
     
 }
 
-void flashDisplay(bool editMode, int componentToFlicker) {
-    //this function will flash the display for when the alarm goes off as well data that is being edited
-    if (!editMode) {
-        // simply flicker entire display
-    } else {
-        //
-    }
+void flashDisplay() {
+   //this function will flash the screen when an alarm is going off
 }

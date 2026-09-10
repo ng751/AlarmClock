@@ -9,5 +9,6 @@ void snooze();
 void snoozeConfigurations();
 void silence();
 void setAlarm();
+void changeDateTime();
 
 #endif // ALARM_H

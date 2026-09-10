@@ -4,6 +4,7 @@
 #include <display_manager.h>
 #include <time_config.h>
 #include <RTClib.h>
+#include <alarm.h>
 
 UIState currentUIState;
 //const int buzzer = 10;
@@ -65,8 +66,12 @@ void loop() {
     } else if (inputPressed(BTN_SET_ALARM)) {
         displayString("Set Alarm Button", 1, 0, 0, true);
         //rtc1.adjust(writeUserTime());
-    } else if (inputPressed(ENCODER_SWITCH)) {
+    } else if (inputPressed(ENCODER_SWITCH) && currentUIState == STATE_DEFAULT) { // when select is pressed and default display is showing, it prompts for time and date change
       displayString("Select", 1, 0, 0, true);
+      changeDateTime();
+      if (currentUIState == STATE_EDIT_VALUE) {
+        // edit state, doesnt apply to only date and time but also other configurations. one click selects.
+      }
     } else {
         //do nothing for now
     }

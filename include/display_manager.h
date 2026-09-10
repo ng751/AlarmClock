@@ -10,10 +10,19 @@
 #define SCREEN_WIDTH 128 
 #define SCREEN_HEIGHT 64
 
-enum UIState {
+enum UIState { //enum that describes every possible state in which the alarm clock can be
     STATE_DEFAULT,
     STATE_SCROLL_MENU,
-    STATE_EDIT_VALUE
+    STATE_EDIT_YEAR,
+    STATE_EDIT_MONTH,
+    STATE_EDIT_DAY, 
+    STATE_EDIT_HOUR,
+    STATE_EDIT_MINUTES,
+    STATE_EDIT_SECONDS,
+    STATE_EDIT_AMPM,
+    STATE_EDIT_SNOOZEDELAY, //snooze delay
+    STATE_EDIT_SNOOZESBEFORESILENCE, //amount of times alarm can be snoozed before it silences
+    STATE_EDIT_TIMEUNTILSILENCE //how long an alarm will sound before silenced
 
 };
 
@@ -23,7 +32,7 @@ bool displayFound();
 void displayString(String message, int textSize, int cursorX, int cursorY, bool clearDisplay); 
 void displayClear();
 void displayDim(bool dim, bool isManual);
-void flashDisplay(bool editMode, int componentToFlicker);
+void flashDisplay();
 
 //add function to display a selectable list with arguments that include # of items and the list of items 
 

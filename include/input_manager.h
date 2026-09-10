@@ -15,7 +15,7 @@ enum InputIndex {
     NUM_INPUTS  // Equal to 5
 };
 
-// Structure that maps an input to a pin number.
+// Structure that maps an input to a pin number
 struct InputMap {
     InputIndex type;
     uint8_t pin;
@@ -39,5 +39,6 @@ void encoderInit();
 void encoderDirection();
 //int retrieveEncoderDirection();
 void automaticDimming();
+
 
 #endif // INPUT_MANAGER_H

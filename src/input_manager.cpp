@@ -46,6 +46,27 @@ void encoderDirection() {
     
     bool updateDisplay = false; //dont update since nothing has happened
 
+    if (currentUIState != STATE_DEFAULT && currentUIState != STATE_SCROLL_MENU) {
+        if (isClockwise) {
+            if (currentUIState == STATE_EDIT_YEAR)  userYear++;
+            if (currentUIState == STATE_EDIT_MONTH) { userMonth++; if(userMonth > 12) userMonth = 1; }
+            if (currentUIState == STATE_EDIT_DAY)   { userDay++;   if(userDay > 31)   userDay = 1; }
+            if (currentUIState == STATE_EDIT_HOUR)  { userHour++;  if(userHour > 23)  userHour = 0; }
+            if (currentUIState == STATE_EDIT_MINUTES)   { userMin++;   if(userMin > 59)   userMin = 0; }
+            if (currentUIState == STATE_EDIT_SECONDS)   { userSec--;   if(userMin < 0)   userMin = 59; }
+            if (currentUIState == STATE_EDIT_AMPM)   { userAMPM;   if(userAMPM = "AM")   userAMPM = "PM"; }
+        } else {
+            if (currentUIState == STATE_EDIT_YEAR)  userYear--;
+            if (currentUIState == STATE_EDIT_MONTH) { userMonth--; if(userMonth < 1)  userMonth = 12; }
+            if (currentUIState == STATE_EDIT_DAY)   { userDay--;   if(userDay < 1)   userDay = 31; }
+            if (currentUIState == STATE_EDIT_HOUR)  { userHour--;  if(userHour < 0)   userHour = 23; }
+            if (currentUIState == STATE_EDIT_MINUTES)   { userMin--;   if(userMin < 0)   userMin = 59; }
+            if (currentUIState == STATE_EDIT_SECONDS)   { userSec--;   if(userMin < 0)   userMin = 59; }
+             if (currentUIState == STATE_EDIT_AMPM)   { userAMPM;   if(userAMPM = "PM")   userAMPM = "AM"; }
+        }
+
+    }
+
     switch (currentUIState) {
       
       case STATE_DEFAULT:
@@ -71,15 +92,7 @@ void encoderDirection() {
         updateDisplay = true; // Flag that the menu text needs to change
         break;
 
-      case STATE_EDIT_VALUE:
-        // a number is being altered
-        if (isClockwise) {
-          Serial.println("Edit: Increase Value");
-        } else {
-          Serial.println("Edit: Decrease Value");
-        }
-        updateDisplay = true; // update display
-        break;
+      
     }
 
     if (updateDisplay) {
