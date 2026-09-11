@@ -7,6 +7,9 @@
 #include <time_config.h>
 #include <display_manager.h>
 #include <alarm.h>
+#include <input_manager.h>
+
+bool dstEnabled = false;
 
 
 char dayOfTheWeek(const std::tm& displayTime) {
@@ -90,11 +93,24 @@ void clockUpdate() {
   }
 }
 
-void dstConfigure(bool dstEnabled) { // adds or removes an hour to or from the display time
-    if (dstEnabled) {
-        
-    } else {
-        
+void dstConfigure() {
+  bool currentButtonState = (digitalRead(INPUTS[BTN_DST].pin) == LOW);
+  static bool lastButtonState = false;
+  static unsigned long lastDebounceTime = 0;
+  const unsigned long debounceDelay = 50;
+
+  if (currentButtonState == true && lastButtonState == false) {
+    if (millis() - lastDebounceTime > debounceDelay) {
+      lastDebounceTime = millis();
+
+      if (currentUIState == STATE_DEFAULT) {
+      
+        dstEnabled = !dstEnabled;
+      
+        updateDisplayFlag = true; 
+      }
     }
+  }
+  lastButtonState = currentButtonState;
 }
 

@@ -124,8 +124,9 @@ void encoderSwitch() {
   bool currentButtonState = (digitalRead(INPUTS[ENCODER_SWITCH].pin) == LOW);
   if (currentButtonState != lastButtonState) {
     if (millis() - lastDebounceTime > debounceDelay) {
-      lastDebounceTime = millis(); // reset debounce timer
-  
+      lastDebounceTime = millis(); // Reset debounce timer
+    
+    // If the transition was a physical PRESS DOWN, route the code
       if (currentButtonState == true) {
       
         switch (currentUIState) {

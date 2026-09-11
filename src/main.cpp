@@ -65,14 +65,14 @@ void loop() {
 
     encoderSwitch();
 
+    dstConfigure();
+
 
    if (inputPressed(BTN_RST)) { //implement debounce for inputs where needed
         displayString("Restarting", 1, 0, 0, true);
         ESP.restart();
     } else if (inputPressed(BTN_FORMAT)) {
         displayString("Format Button", 1, 0, 0, true);
-    } else if (inputPressed(BTN_DST)) {
-        displayString("DST Button", 1, 0, 0, true);
     } else if (inputPressed(BTN_SNOOZE_SILENCE)) {
         displayString("Snooze/Silence Button", 1, 0, 0, true);
     } else if (inputPressed(BTN_SET_ALARM)) {

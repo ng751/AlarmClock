@@ -53,12 +53,19 @@ void updateDisplay() {
 
   char timeBuffer[32]; // stores characters
 
+  tm displayTime = systemTime; 
+
+  if (dstEnabled) {
+    displayTime.tm_hour += 1;
+    mktime(&displayTime); 
+  }
+
   switch (currentUIState) {
     case STATE_DEFAULT:
       display.clearDisplay();
-      snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d:%02d", systemTime.tm_hour, systemTime.tm_min, systemTime.tm_sec); 
+      snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d:%02d", displayTime.tm_hour, displayTime.tm_min, displayTime.tm_sec); 
       displayString(timeBuffer, 2, 16, 10, false); 
-      snprintf(timeBuffer, sizeof(timeBuffer), "%04d/%02d/%02d", systemTime.tm_year + 1900, systemTime.tm_mon + 1, systemTime.tm_mday); 
+      snprintf(timeBuffer, sizeof(timeBuffer), "%04d/%02d/%02d", displayTime.tm_year + 1900, displayTime.tm_mon + 1, displayTime.tm_mday); 
       displayString(timeBuffer, 1, 32, 40, false);
 
       display.display();
