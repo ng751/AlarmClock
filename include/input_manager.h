@@ -37,6 +37,7 @@ void initInputManager();
 bool inputPressed(InputIndex btn);
 void encoderInit();
 void encoderDirection();
+void encoderSwitch();
 //int retrieveEncoderDirection();
 void automaticDimming();
 

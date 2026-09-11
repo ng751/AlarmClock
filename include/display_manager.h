@@ -26,12 +26,14 @@ enum UIState { //enum that describes every possible state in which the alarm clo
 };
 
 extern UIState currentUIState;
+extern bool updateDisplayFlag;
 
 bool displayFound();
 void displayString(String message, int textSize, int cursorX, int cursorY, bool clearDisplay); 
 void displayClear();
 void displayDim(bool dim, bool isManual);
 void flashDisplay();
+void updateDisplay();
 
 //add function to display a selectable list with arguments that include # of items and the list of items 
 

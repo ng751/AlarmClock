@@ -6,6 +6,7 @@
 #include <RTClib.h>
 #include <time_config.h>
 #include <display_manager.h>
+#include <alarm.h>
 
 
 char dayOfTheWeek(const std::tm& displayTime) {
@@ -39,21 +40,21 @@ char dayOfTheWeek(const std::tm& displayTime) {
 void writeUserTime(tm userTime) {
     //this function formats user entered data in a DateTime structure
     rtc.adjust(DateTime(
-        userTime.tm_year + 1900,
+       userTime.tm_year + 1900,
         userTime.tm_mon + 1,
-        userTime.tm_mday,
-        userTime.tm_hour,
-        userTime.tm_min,
-        userTime.tm_sec
+       userTime.tm_mday,
+     userTime.tm_hour,
+     userTime.tm_min,
+       userTime.tm_sec
     ));
 }
 
 void rtcFound() {
-    if (! rtc.begin()) {
-        Serial.println("RTC not found");
-        Serial.flush();
-        for (;;); // Infinitely loop if rtc is not found
-    }
+   if (! rtc.begin()) {
+    Serial.println("RTC not found");
+    Serial.flush();
+    for (;;); // Infinitely loop if rtc is not found
+   }
 }
 
 void formatTime() { //switches between 12 and 24 hours, will take time as argument
@@ -63,6 +64,30 @@ void formatTime() { //switches between 12 and 24 hours, will take time as argume
 void displayTime() {
    // displayString(UserTime(), 2, 0, 0 , true)
    //this will display the user entered time
+}
+
+void clockUpdate() {
+    if (currentUIState == STATE_DEFAULT) {
+    
+    DateTime now = rtc.now(); 
+
+    static int lastSecond = -1;
+    
+    if (now.second() != lastSecond) {
+      lastSecond = now.second();
+
+      // global systemTime is updated to reflect rtc data
+      systemTime.tm_sec  = now.second();
+      systemTime.tm_min  = now.minute();
+      systemTime.tm_hour = now.hour();
+      systemTime.tm_mday = now.day();
+      systemTime.tm_mon  = now.month() - 1;   
+      systemTime.tm_year = now.year() - 1900; 
+
+      // update display to reflect correct time
+      updateDisplayFlag = true; 
+    }
+  }
 }
 
 void dstConfigure(bool dstEnabled) { // adds or removes an hour to or from the display time

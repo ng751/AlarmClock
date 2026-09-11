@@ -13,8 +13,10 @@ int DT_current;
 int DT_previous;
 int Photoresistor_value;
 bool override;
-bool updateDisplay;
+bool lastButtonState;
 
+static unsigned long lastDebounceTime = 0;
+const unsigned long debounceDelay = 50;
 
 void initInputManager() {
     // Loop through the structures and extract the exact pin numbers
@@ -41,10 +43,9 @@ void encoderDirection() {
 
   if (CLK_current == LOW && CLK_previous == HIGH) {
     override = true;
-    
     // determine direction of the turn
     bool isClockwise = (digitalRead(INPUTS[ENCODER_DT].pin) != CLK_current);
-    
+     Serial.print(isClockwise);
     bool updateDisplay = false; //dont update since nothing has happened
 
     if (currentUIState != STATE_DEFAULT && currentUIState != STATE_SCROLL_MENU) {
@@ -64,9 +65,10 @@ void encoderDirection() {
             if (currentUIState == STATE_EDIT_MINUTES)   { editBuffer.tm_min--;   if(editBuffer.tm_min < 0)   editBuffer.tm_min = 59; }
             if (currentUIState == STATE_EDIT_SECONDS)   { editBuffer.tm_sec--;   if(editBuffer.tm_sec < 0)   editBuffer.tm_sec = 59; }
         }
-
+        updateDisplayFlag = true;
     }
 
+    Serial.print("test");
     switch (currentUIState) {
       
       case STATE_DEFAULT:
@@ -89,7 +91,6 @@ void encoderDirection() {
           counter--; // to scroll up
           Serial.println("Menu: Scroll Up");
         }
-        updateDisplay = true; // Flag that the menu text needs to change
         break;
 
       
@@ -115,5 +116,38 @@ void automaticDimming() {
     } else if (Photoresistor_value >= 1000 && (override == false)) {
         displayDim(false, false);
     } 
+    //updateDisplayFlag = true;
+}
+
+
+void encoderSwitch() {
+  bool currentButtonState = (digitalRead(INPUTS[ENCODER_SWITCH].pin) == LOW);
+  if (currentButtonState != lastButtonState) {
+    if (millis() - lastDebounceTime > debounceDelay) {
+      lastDebounceTime = millis(); // reset debounce timer
+  
+      if (currentButtonState == true) {
+      
+        switch (currentUIState) {
+
+          case STATE_DEFAULT:
+            Serial.println("default again");
+            encoderDirection();
+            editBuffer = systemTime;
+            currentUIState = STATE_EDIT_YEAR;
+            break;
+          
+          default:
+            if (currentUIState != STATE_SCROLL_MENU) {
+              changeDateTime();
+            }
+            break;
+        }
+        updateDisplayFlag = true;
+      }
+    }
+  }  
+    
+  lastButtonState = currentButtonState;
 }
 

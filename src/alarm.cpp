@@ -35,55 +35,56 @@
  }
 
  void changeDateTime() {
-    //while(!digitalRead(ENCODER_SWITCH)); // Pause until user lets go of the button
 
+  
+
+    Serial.println("test");
 
     switch (currentUIState) {
+
+    case STATE_EDIT_YEAR:
       
-      case STATE_EDIT_YEAR:
-        // Year is locked in! Automatically shift focus to Month
-        Serial.println("here 2");
-        currentUIState = STATE_EDIT_MONTH;
-        break;
+      currentUIState = STATE_EDIT_MONTH;
+      break;
         
-      case STATE_EDIT_MONTH:
-      Serial.println("here 3");
+    case STATE_EDIT_MONTH:
+   
+      currentUIState = STATE_EDIT_DAY;
+      break;
+        
+    case STATE_EDIT_DAY:
+     
+      currentUIState = STATE_EDIT_HOUR;
+      break;
+
+    case STATE_EDIT_HOUR:
+     
+      currentUIState = STATE_EDIT_MINUTES;
+      break;
+
+    case STATE_EDIT_MINUTES:
     
-        currentUIState = STATE_EDIT_DAY;
-        break;
-        
-      case STATE_EDIT_DAY:
-        
-        currentUIState = STATE_EDIT_HOUR;
-        break;
-        
-      case STATE_EDIT_HOUR:
-    
-        currentUIState = STATE_EDIT_MINUTES;
-        break;
-        
-      case STATE_EDIT_MINUTES:
-         Serial.println("here 6");
+     
+      currentUIState = STATE_EDIT_SECONDS;
+      break;
+    case STATE_EDIT_SECONDS:
+
       
-        currentUIState = STATE_EDIT_SECONDS;
-        // rtc.adjust(DateTime(userYear, userMonth, userDay, userHour, userMin, 0));
-      case STATE_EDIT_SECONDS:
-        systemTime = editBuffer;
+       systemTime = editBuffer;
 
-        mktime(&systemTime);
+      mktime(&systemTime);
 
-        writeUserTime(systemTime);
+      writeUserTime(systemTime);
 
-        Serial.println("time and date saved");
-        Serial.println("Time and date saved:");
-  Serial.print("Year: ");  Serial.println(systemTime.tm_year + 1900);
-  Serial.print("Month: "); Serial.println(systemTime.tm_mon + 1);
-  Serial.print("Day: ");   Serial.println(systemTime.tm_mday);
-  Serial.print("Hour: ");  Serial.println(systemTime.tm_hour);
-  Serial.print("Min: ");   Serial.println(systemTime.tm_min);
-        currentUIState = STATE_DEFAULT; // Automatically pop back out to the main screen
-        break;
+     // Serial.println("Time and date saved:");
+     // Serial.print("Year: ");  Serial.println(systemTime.tm_year + 1900);
+     // Serial.print("Month: "); Serial.println(systemTime.tm_mon + 1);
+    //  Serial.print("Day: ");   Serial.println(systemTime.tm_mday);
+      //Serial.print("Hour: ");  Serial.println(systemTime.tm_hour);
+     // Serial.print("Min: ");   Serial.println(systemTime.tm_min);
+      currentUIState = STATE_DEFAULT; // Automatically pop back out to the main screen
+     break;
     }
-    
-    // Alert the system that the UI state shifted and the display needs to reflect the new field
+     updateDisplayFlag = true;
+    // alert the system that the UI state changed and the display needs to reflect the new field
   }

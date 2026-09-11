@@ -6,7 +6,8 @@
 #include <RTClib.h>
 #include <alarm.h>
 
-UIState currentUIState;
+UIState currentUIState = STATE_DEFAULT;
+
 //const int buzzer = 10;
 
 RTC_DS3231 rtc;
@@ -14,13 +15,13 @@ RTC_DS3231 rtc;
 tm editBuffer;
 tm systemTime;
 
-#define I2C_SDA_PIN 8 // Replace with the physical GPIO pin number wired to SDA
+
+#define I2C_SDA_PIN 8
 #define I2C_SCL_PIN 9
 
 void setup() {
     Serial.begin(115200);
-    
-    currentUIState = STATE_DEFAULT;
+  
 
    // delay(200);
 
@@ -29,12 +30,9 @@ void setup() {
     encoderInit(); // read the current rotary encoder value to set up the encoderDirection function
 
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
-    Wire.setClock(400000);
 
-    if (!rtc.begin()) {
-        Serial.println("Hardware connection to RTC failed!");
-    while(1); 
-  }
+
+    rtcFound();
 
     //pinMode(buzzer, OUTPUT);
 
@@ -49,7 +47,8 @@ void setup() {
 
     displayClear(); // clear the display
 
-    displayString("hello world", 2, 0, 0, true);
+    clockUpdate(); //MUST ALWAYS RUN 
+    updateDisplay();  
 
     //writeUserTime();
 
@@ -64,6 +63,8 @@ void loop() {
 
     encoderDirection(); // if menu selection is taking place, the argument will be true and the encoder will act differently. no conditional yet so just false for now
 
+    encoderSwitch();
+
 
    if (inputPressed(BTN_RST)) { //implement debounce for inputs where needed
         displayString("Restarting", 1, 0, 0, true);
@@ -77,39 +78,11 @@ void loop() {
     } else if (inputPressed(BTN_SET_ALARM)) {
         displayString("Set Alarm Button", 1, 0, 0, true);
         //rtc1.adjust(writeUserTime());
-    } else if (inputPressed(ENCODER_SWITCH)) { // when select is pressed and default display is showing, it prompts for time and date change
-      // 1. HARDWARE DEBOUNCE: Wait 50ms for physical contact vibrations to stop
-  
-  // 2. STATE LOCK: Freeze the code while the user's finger is STILL holding the button down.
-  // This prevents the code from advancing past the first case until they let go.
-  // Replace 'digitalRead' with your own input function if you use an array matrix.
- 
-  
-  // 3. DEBOUNCE RELEASE: Wait another 50ms to ensure the release contact noise is cleared
-
-  // 4. THE ROUTER: Now it is 100% safe to advance the state machine exactly ONE step
-  if (currentUIState == STATE_DEFAULT) {
-    displayString("Select", 1, 0, 0, true);
-    editBuffer = systemTime;           // Copy hard time to soft buffer
-    currentUIState = STATE_EDIT_YEAR;  // Move to Year
-  } 
-  else if (currentUIState != STATE_DEFAULT && currentUIState != STATE_SCROLL_MENU) {
-    // This will now execute perfectly exactly once per physical click!
-    displayString("Select 5", 1, 0, 0, true);
-    changeDateTime(); 
-  }
-  
-
+    
     } else {
         //do nothing for now
     }
-
-
-    //char buffer[] = "YYYY/MM/DD at hh:mm:ss";
-      
-     // Serial.println("\n--- Time Received! ---");
-     // Serial.print("You entered: ");
-    //  Serial.println(writeUserTime().toString(buffer));
-    //  displayString(writeUserTime().toString(buffer), 2, 0, 0, true);
+    clockUpdate(); //MUST ALWAYS RUN 
+    updateDisplay();  
 
 }
