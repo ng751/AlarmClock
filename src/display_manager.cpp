@@ -9,12 +9,18 @@
 #include <Adafruit_SSD1306.h>
 #include <time_config.h>
 #include <alarm.h>
+#include <elapsedMillis.h>
 
 #define OLED_VCC_PIN 18
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 bool updateDisplayFlag = false;
+elapsedMillis sinceLastFlicker;
+elapsedMillis flickerDuration;
+bool displayIsFlickering;
+bool displayOn;
+int maxFlickerTime;
 
 
 bool displayFound() { //this function checks to make sure the display exists
@@ -70,14 +76,14 @@ void updateDisplay() {
         int hour12 = displayTime.tm_hour % 12;
         if (hour12 == 0) hour12 = 12;
           const char* period = (displayTime.tm_hour >= 12) ? "PM" : "AM";
-          snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d:%02d %s", hour12, displayTime.tm_min, displayTime.tm_sec, period);
+          snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d:%02d %s %s", hour12, displayTime.tm_min, displayTime.tm_sec, period, dayOfTheWeek(displayTime));
         } else {
-          snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d:%02d", displayTime.tm_hour, displayTime.tm_min, displayTime.tm_sec);
+          snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d:%02d %s", displayTime.tm_hour, displayTime.tm_min, displayTime.tm_sec, dayOfTheWeek(displayTime));
         }
 
       displayString(timeBuffer, 2, 16, 10, false);
       snprintf(timeBuffer, sizeof(timeBuffer), "%04d/%02d/%02d", displayTime.tm_year + 1900, displayTime.tm_mon + 1, displayTime.tm_mday);
-      displayString(timeBuffer, 1, 32, 40, false);
+      displayString(timeBuffer, 1, 32, 45, false);
       break;
 
     case STATE_EDIT_YEAR:
@@ -178,6 +184,39 @@ void displayDim(bool dimFurther, bool isManual) { //prototype for the dimming fe
     
 }
 
-void flashDisplay() {
-   //this function will flash the screen when an alarm is going off
+void activateFlicker(int flickerTime){
+  maxFlickerTime = flickerTime;
+  flickerDuration = 0;
+  sinceLastFlicker = 0;
+  displayIsFlickering = true;
+}
+
+void flickerDisplay() {
+   if (!displayIsFlickering) {
+        return; 
+    }
+
+
+    if (flickerDuration >= maxFlickerTime) {
+        displayIsFlickering = false;
+        
+      
+        if (!displayOn) {
+            display.ssd1306_command(SSD1306_DISPLAYON);
+            displayOn = true;
+        }
+        return;
+    }
+
+    if (sinceLastFlicker >= 250) {
+        sinceLastFlicker= 0; 
+        
+        if (displayOn) {
+            display.ssd1306_command(SSD1306_DISPLAYOFF);
+            displayOn = false;
+        } else {
+            display.ssd1306_command(SSD1306_DISPLAYON);
+            displayOn = true;
+        }
+    }
 }

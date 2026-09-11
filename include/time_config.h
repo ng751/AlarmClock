@@ -16,7 +16,7 @@ extern RTC_DS3231 rtc;
 extern bool dstEnabled;
 extern bool standardFormat;
 
-char dayOfTheWeek(const std::tm& displayTime);
+String dayOfTheWeek(tm& displayTime);
 void writeUserTime(tm userTime);
 void displayTime();
 void dstConfigure();

@@ -50,6 +50,8 @@ void setup() {
     clockUpdate(); //MUST ALWAYS RUN 
     updateDisplay();  
 
+    //activateFlicker(10000);
+
     //writeUserTime();
 
     //delay(200);
@@ -68,6 +70,8 @@ void loop() {
     dstConfigure();
 
     formatTime();
+
+    //flickerDisplay();
 
 
    if (inputPressed(BTN_RST)) { //implement debounce for inputs where needed
