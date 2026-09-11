@@ -14,12 +14,13 @@ struct Alarm {
 
 extern RTC_DS3231 rtc;
 extern bool dstEnabled;
+extern bool standardFormat;
 
 char dayOfTheWeek(const std::tm& displayTime);
 void writeUserTime(tm userTime);
 void displayTime();
 void dstConfigure();
-void formatTime(); //switches between 12 and 24 hours, will take time as an argument
+void formatTime(); 
 void rtcFound();
 void clockUpdate();
 

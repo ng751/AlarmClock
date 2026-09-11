@@ -51,6 +51,8 @@ int oldState;
 void updateDisplay() {
   if (!updateDisplayFlag) return; // return if updateflag was not updated to true
 
+  Serial.println(systemTime.tm_hour);
+
   char timeBuffer[32]; // stores characters
 
   tm displayTime = systemTime; 
@@ -63,12 +65,19 @@ void updateDisplay() {
   switch (currentUIState) {
     case STATE_DEFAULT:
       display.clearDisplay();
-      snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d:%02d", displayTime.tm_hour, displayTime.tm_min, displayTime.tm_sec); 
-      displayString(timeBuffer, 2, 16, 10, false); 
-      snprintf(timeBuffer, sizeof(timeBuffer), "%04d/%02d/%02d", displayTime.tm_year + 1900, displayTime.tm_mon + 1, displayTime.tm_mday); 
-      displayString(timeBuffer, 1, 32, 40, false);
 
-      display.display();
+      if (standardFormat) { //this is a little sloppy but i dont care to clean it up at the moment
+        int hour12 = displayTime.tm_hour % 12;
+        if (hour12 == 0) hour12 = 12;
+          const char* period = (displayTime.tm_hour >= 12) ? "PM" : "AM";
+          snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d:%02d %s", hour12, displayTime.tm_min, displayTime.tm_sec, period);
+        } else {
+          snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d:%02d", displayTime.tm_hour, displayTime.tm_min, displayTime.tm_sec);
+        }
+
+      displayString(timeBuffer, 2, 16, 10, false);
+      snprintf(timeBuffer, sizeof(timeBuffer), "%04d/%02d/%02d", displayTime.tm_year + 1900, displayTime.tm_mon + 1, displayTime.tm_mday);
+      displayString(timeBuffer, 1, 32, 40, false);
       break;
 
     case STATE_EDIT_YEAR:

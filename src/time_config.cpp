@@ -10,7 +10,7 @@
 #include <input_manager.h>
 
 bool dstEnabled = false;
-
+bool standardFormat = false;
 
 char dayOfTheWeek(const std::tm& displayTime) {
     // Calculate the day of the week using Zeller's Congruence
@@ -61,7 +61,24 @@ void rtcFound() {
 }
 
 void formatTime() { //switches between 12 and 24 hours, will take time as argument
+   bool currentButtonState = (digitalRead(INPUTS[BTN_FORMAT].pin) == LOW);
+  static bool lastButtonState = false;
+  static unsigned long lastDebounceTime = 0;
+  const unsigned long debounceDelay = 50;
 
+  if (currentButtonState == true && lastButtonState == false) {
+    if (millis() - lastDebounceTime > debounceDelay) {
+      lastDebounceTime = millis();
+
+      if (currentUIState == STATE_DEFAULT) {
+      
+        standardFormat = !standardFormat;
+      
+        updateDisplayFlag = true; 
+      }
+    }
+  }
+  lastButtonState = currentButtonState;
 }
 
 void displayTime() {
