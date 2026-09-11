@@ -59,9 +59,9 @@ void encoderDirection() {
             if (currentUIState == STATE_EDIT_SECONDS)   { editBuffer.tm_sec++;   if(editBuffer.tm_sec > 59)   editBuffer.tm_sec = 0; }
         } else {
             if (currentUIState == STATE_EDIT_YEAR)  editBuffer.tm_year--;
-            if (currentUIState == STATE_EDIT_MONTH) { editBuffer.tm_mon--; if(editBuffer.tm_mon < 1)  editBuffer.tm_mon = 12; }
+            if (currentUIState == STATE_EDIT_MONTH) { editBuffer.tm_mon--; if (editBuffer.tm_mon < 0) editBuffer.tm_mon = 11; }
             if (currentUIState == STATE_EDIT_DAY)   { editBuffer.tm_mday--;   if(editBuffer.tm_mday < 1)   editBuffer.tm_mday = 31; }
-            if (currentUIState == STATE_EDIT_HOUR)  { editBuffer.tm_hour--;  if(editBuffer.tm_mday < 0)   editBuffer.tm_mday = 23; }
+            if (currentUIState == STATE_EDIT_HOUR)  { editBuffer.tm_hour--;  if(editBuffer.tm_hour < 0)   editBuffer.tm_hour = 23; }
             if (currentUIState == STATE_EDIT_MINUTES)   { editBuffer.tm_min--;   if(editBuffer.tm_min < 0)   editBuffer.tm_min = 59; }
             if (currentUIState == STATE_EDIT_SECONDS)   { editBuffer.tm_sec--;   if(editBuffer.tm_sec < 0)   editBuffer.tm_sec = 59; }
         }
@@ -120,6 +120,7 @@ void automaticDimming() {
 }
 
 
+
 void encoderSwitch() {
   bool currentButtonState = (digitalRead(INPUTS[ENCODER_SWITCH].pin) == LOW);
   if (currentButtonState != lastButtonState) {
@@ -137,6 +138,8 @@ void encoderSwitch() {
             editBuffer = systemTime;
             currentUIState = STATE_EDIT_YEAR;
             break;
+          case STATE_SCROLL_MENU:
+            //select menu option
           
           default:
             if (currentUIState != STATE_SCROLL_MENU) {

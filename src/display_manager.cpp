@@ -220,3 +220,7 @@ void flickerDisplay() {
         }
     }
 }
+
+void drawAlarmMenu() {
+  
+}

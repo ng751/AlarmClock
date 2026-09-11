@@ -37,6 +37,7 @@ void displayDim(bool dim, bool isManual);
 void activateFlicker(int flickerTime);
 void flickerDisplay();
 void updateDisplay();
+void drawAlarmMenu();
 
 //add function to display a selectable list with arguments that include # of items and the list of items 
 

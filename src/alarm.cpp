@@ -8,6 +8,8 @@
  #include <alarm.h>
  #include <time_config.h>
 
+ 
+
 
 
  void buzzerSound() {
@@ -29,10 +31,31 @@
     //this will silence the buzzer altogether
  }
 
- void setAlarm() {
-   currentUIState = STATE_SCROLL_MENU;
-   //this function runs when the set alarm button is pressed, each character i
- }
+ 
+void setAlarm() {
+  bool currentButtonState = (digitalRead(INPUTS[BTN_SET_ALARM].pin) == LOW);
+  static bool lastButtonState = false;
+  static unsigned long lastDebounceTime = 0;
+  const unsigned long debounceDelay = 50;
+  if (currentButtonState != lastButtonState) {
+    if (millis() - lastDebounceTime > debounceDelay) {
+      lastDebounceTime = millis(); // Reset debounce timer
+
+      if (currentButtonState == true) {
+      
+         if (currentUIState == STATE_SCROLL_MENU) {
+          currentUIState = STATE_DEFAULT;
+         } else {
+          currentUIState = STATE_SCROLL_MENU;
+          drawAlarmMenu();
+         }
+        updateDisplayFlag = true;
+      }
+    }
+  }  
+    
+  lastButtonState = currentButtonState;
+}
 
  void changeDateTime() {
 
