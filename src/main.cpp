@@ -8,8 +8,6 @@
 
 UIState currentUIState = STATE_DEFAULT;
 
-//const int buzzer = 10;
-
 RTC_DS3231 rtc;
 
 tm editBuffer;
@@ -34,7 +32,7 @@ void setup() {
 
     rtcFound();
 
-    //pinMode(buzzer, OUTPUT);
+    pinMode(10, OUTPUT);
 
     delay(1000);
 
@@ -71,6 +69,10 @@ void loop() {
 
     formatTime();
 
+    soundAlarm();
+
+    setAlarm();
+
     //flickerDisplay();
 
 
@@ -79,8 +81,7 @@ void loop() {
         ESP.restart();
     } else if (inputPressed(BTN_SNOOZE_SILENCE)) {
         displayString("Snooze/Silence Button", 1, 0, 0, true);
-    } else if (inputPressed(BTN_SET_ALARM)) {
-        displayString("Set Alarm Button", 1, 0, 0, true);
+
         //rtc1.adjust(writeUserTime());
     
     } else {

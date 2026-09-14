@@ -66,10 +66,6 @@ void formatTime() { //switches between 12 and 24 hours, will take time as argume
   lastButtonState = currentButtonState;
 }
 
-void displayTime() {
-   // displayString(UserTime(), 2, 0, 0 , true)
-   //this will display the user entered time
-}
 
 void clockUpdate() {
     if (currentUIState == STATE_DEFAULT) {

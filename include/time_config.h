@@ -4,21 +4,12 @@
 #include <ctime>
 #include <RTClib.h>
 
-
-struct Alarm {
-    std::tm alarmTime{};
-    bool isEnabled{false};
-    bool isDaily{false};
-    //include tone, visual aspect
-};
-
 extern RTC_DS3231 rtc;
 extern bool dstEnabled;
 extern bool standardFormat;
 
 String dayOfTheWeek(tm& displayTime);
 void writeUserTime(tm userTime);
-void displayTime();
 void dstConfigure();
 void formatTime(); 
 void rtcFound();

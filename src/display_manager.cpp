@@ -11,10 +11,13 @@
 #include <alarm.h>
 #include <elapsedMillis.h>
 
+
 #define OLED_VCC_PIN 18
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
+
+tm displayTime = systemTime;
 bool updateDisplayFlag = false;
 elapsedMillis sinceLastFlicker;
 elapsedMillis flickerDuration;
@@ -22,6 +25,14 @@ bool displayIsFlickering;
 bool displayOn;
 int maxFlickerTime;
 
+char alarmMenu[3][16] = {
+  "Alarm 1",
+  "Alarm 2",
+  "Alarm 3"
+};
+
+int alarmCount = 3;
+int currentMenuScrollPosition = 0;
 
 bool displayFound() { //this function checks to make sure the display exists
     if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
@@ -61,7 +72,7 @@ void updateDisplay() {
 
   char timeBuffer[32]; // stores characters
 
-  tm displayTime = systemTime; 
+  displayTime = systemTime; 
 
   if (dstEnabled) {
     displayTime.tm_hour += 1;
@@ -85,6 +96,10 @@ void updateDisplay() {
       snprintf(timeBuffer, sizeof(timeBuffer), "%04d/%02d/%02d", displayTime.tm_year + 1900, displayTime.tm_mon + 1, displayTime.tm_mday);
       displayString(timeBuffer, 1, 32, 45, false);
       break;
+
+    case STATE_SCROLL_MENU:
+        drawAlarmMenu();
+        break;
 
     case STATE_EDIT_YEAR:
       displayString("SET YEAR:", 1, 0, 0, true); 
@@ -126,6 +141,50 @@ void updateDisplay() {
       displayString(timeBuffer, 3, 0, 16, false); 
       display.display();
       break;
+    case STATE_EDIT_SELECTALARM:
+        displayString("SELECT ALARM:", 1, 0, 0, true);
+        snprintf(timeBuffer, sizeof(timeBuffer), "%02d", editAlarmBuffer.chosenAlarm);
+        displayString(timeBuffer, 3, 0, 16, false);
+        display.display();
+        break;
+   case STATE_EDIT_SNOOZEDELAY:
+        displayString("SET TIME BETWEEN SNOOZES:", 1, 0, 0, true);
+        snprintf(timeBuffer, sizeof(timeBuffer), "%02d MINS", editAlarmBuffer.snoozeDelay);
+        displayString(timeBuffer, 3, 0, 16, false);
+        display.display();
+        break;
+
+    case STATE_EDIT_SNOOZESBEFORESILENCE:
+        displayString("SET SNOOZES BEFORE SILENCE:", 1, 0, 0, true);
+        
+        if (editAlarmBuffer.snoozesBeforeSilence == 0) {
+            snprintf(timeBuffer, sizeof(timeBuffer), "INDEFINITE");
+        } else {
+            snprintf(timeBuffer, sizeof(timeBuffer), "%02d TIMES", editAlarmBuffer.snoozesBeforeSilence);
+        }
+        
+        displayString(timeBuffer, 3, 0, 16, false);
+        display.display();
+        break;
+
+    case STATE_EDIT_TIMEUNTILSILENCE:
+        displayString("DURATION UNTIL SILENCE:", 1, 0, 0, true);
+        snprintf(timeBuffer, sizeof(timeBuffer), "%02d MINS", editAlarmBuffer.timeUntilSilence);
+        displayString(timeBuffer, 3, 0, 16, false);
+        display.display();
+        break;
+
+    case STATE_EDIT_ALARMDATEBOOL:
+      displayString("ADD A DATE?:", 1, 0, 0, true);
+    if (alarmDateBool) {
+        displayString("> YES", 2, 0,  20, false);
+        displayString("  NO",  2, 70, 20, false); 
+    } else {
+        displayString("  YES", 2, 0,  20, false);
+        displayString("> NO",  2, 70, 20, false); 
+    }
+    display.display();
+    break;
   }
 
   if (currentUIState != STATE_DEFAULT && currentUIState != STATE_SCROLL_MENU) {
@@ -221,6 +280,36 @@ void flickerDisplay() {
     }
 }
 
-void drawAlarmMenu() {
-  
+  void drawAlarmMenu() {
+
+    displayString("--- SELECT ALARM ---", 1, 0, 0, true);
+
+    for (int i = 0; i < 3; i++) {
+        char slotText[24];
+        int yPosition = 16 + (i * 12); // stack rows neatly down the screen (Y: 16, 28, 40)
+
+        // draw a selection arrow '>' only next to the active scroll position
+        if (i == currentMenuScrollPosition) {
+            displayString(">", 1, 0, yPosition, false);
+        } else {
+            displayString(" ", 1, 0, yPosition, false);
+        }
+
+        // format the text depending on whether the alarm is set or empty
+        if (alarmSlots[i].isEnabled) {
+           // if active, print the saved time configuration 
+            snprintf(slotText, sizeof(slotText), "Alm %d: %02d:%02d", 
+                     i + 1, 
+                     alarmSlots[i].alarmTime.tm_hour, 
+                     alarmSlots[i].alarmTime.tm_min);
+        } else {
+            // if unconfigured or overwritten, show an empty placeholder slot
+            snprintf(slotText, sizeof(slotText), "Alm %d: --:-- [EMPTY]", i + 1);
+        }
+
+        // output the slot details string to the screen buffer
+        displayString(slotText, 1, 8, yPosition, false);
+    }
+
 }
+

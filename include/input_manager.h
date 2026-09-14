@@ -26,8 +26,8 @@ inline constexpr InputMap INPUTS[NUM_INPUTS] = {
     { BTN_RST,            13 },
     { BTN_FORMAT,         15 },
     { BTN_DST,             7 },
-    { BTN_SNOOZE_SILENCE,  6 },
-    { BTN_SET_ALARM,       5 },
+    { BTN_SNOOZE_SILENCE,  5 },
+    { BTN_SET_ALARM,       6 },
     { ENCODER_SWITCH,     16 },
     { ENCODER_CLK,        18 },
     { ENCODER_DT,         17 }
