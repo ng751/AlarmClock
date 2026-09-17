@@ -25,13 +25,15 @@ enum UIState { //enum that describes every possible state in which the alarm clo
     STATE_ALARM_SOUNDING,
     STATE_ALARM_SNOOZING,
     STATE_EDIT_ALARMDATEBOOL,
-    STATE_EDIT_SELECTALARM
+    STATE_EDIT_SELECTALARM,
+    STATE_ALARM_ALERT
 
 
 
 };
 
 extern int currentMenuScrollPosition;
+extern bool displayIsFlickering;
 
 extern UIState currentUIState;
 extern bool updateDisplayFlag;
@@ -44,6 +46,7 @@ void activateFlicker(int flickerTime);
 void flickerDisplay();
 void updateDisplay();
 void drawAlarmMenu();
+void snoozeDisplay();
 extern tm displayTime;
 
 //add function to display a selectable list with arguments that include # of items and the list of items 

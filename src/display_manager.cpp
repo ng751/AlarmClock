@@ -10,6 +10,7 @@
 #include <time_config.h>
 #include <alarm.h>
 #include <elapsedMillis.h>
+#include <data_handling.h>
 
 #define OLED_VCC_PIN 18
 
@@ -79,7 +80,31 @@ void updateDisplay() {
   }
 
   switch (currentUIState) {
+    case STATE_SCROLL_MENU:
+        drawAlarmMenu();
+        break;
+
+    
+    
     case STATE_DEFAULT:
+      if (isSnoozing) {
+            displayClear();
+            
+            displayString("Snoozing... zZz", 1, 20, 10, false);
+
+        
+            unsigned long currentMillis = millis();
+            unsigned long remainingSecs = (snoozeEndTime > currentMillis) ? (snoozeEndTime - currentMillis) / 1000 : 0;
+            snprintf(timeBuffer, sizeof(timeBuffer), "%02lu:%02lu", remainingSecs / 60, remainingSecs % 60);
+            displayString(timeBuffer, 2, 35, 28, false);
+            
+            displayString("Tap again to Snooze", 1, 10, 52, false);
+            break;
+        }
+
+        if (isBuzzerActive) {
+            flickerDisplay(); 
+        }
       display.clearDisplay();
 
       if (standardFormat) { //this is a little sloppy but i dont care to clean it up at the moment
@@ -95,11 +120,6 @@ void updateDisplay() {
       snprintf(timeBuffer, sizeof(timeBuffer), "%04d/%02d/%02d", displayTime.tm_year + 1900, displayTime.tm_mon + 1, displayTime.tm_mday);
       displayString(timeBuffer, 1, 32, 45, false);
       break;
-
-    case STATE_SCROLL_MENU:
-        drawAlarmMenu();
-        break;
-
     case STATE_EDIT_YEAR:
       displayString("SET YEAR:", 1, 0, 0, true); 
       snprintf(timeBuffer, sizeof(timeBuffer), "%04d", editBuffer.tm_year + 1900); 
@@ -255,25 +275,17 @@ void activateFlicker(int flickerTime){
 }
 
 void flickerDisplay() {
-   if (!displayIsFlickering) {
-        return; 
-    }
-
-
-    if (flickerDuration >= maxFlickerTime) {
-        displayIsFlickering = false;
-        
-      
+   if (!isBuzzerActive) {
         if (!displayOn) {
             display.ssd1306_command(SSD1306_DISPLAYON);
             displayOn = true;
         }
-        return;
+        return; 
     }
 
-    if (sinceLastFlicker >= 250) {
-        sinceLastFlicker= 0; 
-        
+    if (sinceLastFlicker >= 50) {
+        sinceLastFlicker = 0; 
+
         if (displayOn) {
             display.ssd1306_command(SSD1306_DISPLAYOFF);
             displayOn = false;
@@ -282,6 +294,7 @@ void flickerDisplay() {
             displayOn = true;
         }
     }
+
 }
 
   void drawAlarmMenu() {
@@ -323,4 +336,25 @@ void flickerDisplay() {
         displayString(slotText, 1, 8, yPosition, false);
     }
 
+}
+
+void snoozeDisplay() {
+  // display.invertDisplay(false); 
+
+  //       displayString("Snoozing... zZz", 1, 20, 10, false);
+
+  //       // Compute the minutes and seconds remaining on your snoozeEndTime timeline
+  //       unsigned long currentMillis = millis();
+  //       unsigned long remainingSecs = 0;
+  //       if (snoozeEndTime > currentMillis) {
+  //           remainingSecs = (snoozeEndTime - currentMillis) / 1000;
+  //       }
+  //       unsigned long displayMins = remainingSecs / 60;
+  //       unsigned long displaySecs = remainingSecs % 60;
+
+  //       // Render a countdown time look using your exact string framework
+  //       snprintf(alertBuffer, sizeof(alertBuffer), "%02lu:%02lu", displayMins, displaySecs);
+  //       displayString(alertBuffer, 2, 35, 28, false);
+
+  //       displayString("Tap again to Snooze", 1, 10, 52, false);
 }

@@ -5,6 +5,7 @@
 #include <time_config.h>
 #include <RTClib.h>
 #include <alarm.h>
+#include <data_handling.h>
 
 UIState currentUIState = STATE_DEFAULT;
 
@@ -19,7 +20,7 @@ tm systemTime;
 
 void setup() {
     Serial.begin(115200);
-  
+    loadSystemSettings();
 
    // delay(200);
 
@@ -82,6 +83,7 @@ void loop() {
     snoozeAndSilence();
 
     setAlarm();
+
 
     //flickerDisplay();
 

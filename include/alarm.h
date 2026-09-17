@@ -6,17 +6,6 @@
 extern tm systemTime;
 extern tm editBuffer;
 
-struct Alarm {
-    tm alarmTime{};
-    bool isEnabled{false};
-    bool isDaily{false};
-    char chosenAlarm{0};
-    int snoozeDelay;
-    int snoozesBeforeSilence;
-    int timeUntilSilence;
-
-    //include tone, visual aspect
-};
 
 extern int activeSlotIndex; 
 
@@ -33,8 +22,6 @@ extern int activeToneIndex;
 extern unsigned long buzzerTurnOffTime;
 extern unsigned long snoozeEndTime;
 extern bool isSnoozing;
-extern bool wasSnoozePressed;
-extern bool wasStopPressed;
 extern bool isPreviewActive;  
 extern int previewToneIndex;      
 extern unsigned long previewTurnOffTime;
@@ -44,8 +31,6 @@ extern int activeSnoozeMinutes;
 extern int currentSnoozeCount;   
 
 extern bool alarmDateBool; 
-extern Alarm editAlarmBuffer;
-extern Alarm alarmSlots[3]; 
 
 extern const char* alarmTones[3];
 
@@ -57,6 +42,7 @@ void changeDateTime();
 void playAlarmSound();
 void soundAlarm();
 void alarmData();
+void snoozeAndAlarmDisplayOverlay();
 //void updateBuzzerState();
 
 #endif // ALARM_H

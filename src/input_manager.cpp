@@ -4,6 +4,7 @@
 #include <input_manager.h>
 #include <display_manager.h>
 #include <alarm.h>
+#include <data_handling.h>
 
 int CLK_current; //initalizes variables that will hold the state of both encoder_clk and encoder_dt
 int CLK_previous;
@@ -85,9 +86,9 @@ void encoderDirection() {
                       editAlarmBuffer.chosenAlarm = 0; 
         
                   }
-                // previewToneIndex = editAlarmBuffer.chosenAlarm; // Match the scrolled choice
-           // previewTurnOffTime = millis() + 2000;           // Hard-coded 2-second window
-            //isPreviewActive = true;    
+                 previewToneIndex = editAlarmBuffer.chosenAlarm; // Match the scrolled choice
+           previewTurnOffTime = millis() + 2000;           // Hard-coded 2-second window
+            isPreviewActive = true;    
                     
 
               }
@@ -125,9 +126,9 @@ void encoderDirection() {
                     editAlarmBuffer.chosenAlarm--;
  
                   }
-                 //     previewToneIndex = editAlarmBuffer.chosenAlarm; // Match the scrolled choice
-          //  previewTurnOffTime = millis() + 2000;           // Hard-coded 2-second window
-          //  isPreviewActive = true;   
+                     previewToneIndex = editAlarmBuffer.chosenAlarm; // Match the scrolled choice
+            previewTurnOffTime = millis() + 2000;           // Hard-coded 2-second window
+            isPreviewActive = true;   
                  
                  // playAlarmSound(editAlarmBuffer.chosenAlarm, 20000, alarmTrigger);
               }

@@ -7,6 +7,7 @@
  #include <input_manager.h>
  #include <alarm.h>
  #include <time_config.h>
+ #include <data_handling.h>
 
  int activeSlotIndex = 0;
  bool alarmDateBool = false;
@@ -14,8 +15,6 @@
  unsigned long buzzerTurnOffTime = 0;
  bool isIndefiniteAlarm = false;
  int activeToneIndex = 0;
- bool wasSnoozePressed = false;
-bool wasStopPressed = false;
 
 const int pwmChannel = 0;    
 const int pwmResolution = 8;  
@@ -41,12 +40,12 @@ unsigned long snoozeEndTime = 0;
 bool isSnoozing = false;
 
 
- Alarm editAlarmBuffer;
+Alarm editAlarmBuffer;
 
 
 const char* alarmTones[] = { "tone 1", "tone 2", "tone 3" };
+
 int selectedToneIndex = 0; 
-    //this can include all 3 different buzzer sounds as well as a switch statement possibly
 
 void snoozeAndSilence() {
     unsigned long currentMillis = millis();
@@ -62,13 +61,12 @@ void snoozeAndSilence() {
     if (isPreviewActive && (currentMillis >= previewTurnOffTime)) {
     isPreviewActive = false; // Turn off the preview sound wave generation!
     Serial.println("silence");
-}
+    }   
     
     if (isButtonPressed && !lastButtonState) {
         buttonPressedStartTime = currentMillis;
         holdActionExecuted = false; 
     }
-
     
     if (isButtonPressed && lastButtonState) {
         if (!holdActionExecuted && (currentMillis - buttonPressedStartTime >= 2000)) {
@@ -91,6 +89,7 @@ void snoozeAndSilence() {
         isIndefiniteAlarm = false;
         isSnoozing = false;
         currentSnoozeCount = 0; 
+         currentUIState = STATE_DEFAULT; 
         return;
     }
 
@@ -100,6 +99,7 @@ void snoozeAndSilence() {
         if (activeMaxSnoozes != 0 && currentSnoozeCount >= activeMaxSnoozes) {
             isBuzzerActive = false;
             isIndefiniteAlarm = false;
+            currentUIState = STATE_DEFAULT;
     
             return;
         }
@@ -138,6 +138,7 @@ void snoozeAndSilence() {
 
     if (isBuzzerActive && (currentMillis >= buzzerTurnOffTime)) {
         isBuzzerActive = false; // Automatically shut off because user-configured time ran out
+        currentUIState = STATE_DEFAULT; 
     
     }
 }
@@ -156,6 +157,9 @@ void soundAlarm() {
             if (displayTime.tm_hour == alarmSlots[i].alarmTime.tm_hour &&
                 displayTime.tm_min  == alarmSlots[i].alarmTime.tm_min  &&
                 displayTime.tm_sec  == alarmSlots[i].alarmTime.tm_sec) {
+                currentUIState = STATE_DEFAULT;
+
+              //  currentUIState = STATE_ALARM_ALERT;
         
                 activeToneIndex = alarmSlots[i].chosenAlarm; 
                 isBuzzerActive = true;
@@ -184,6 +188,9 @@ void soundAlarm() {
                 displayTime.tm_year == alarmSlots[i].alarmTime.tm_year &&                                                     
                 displayTime.tm_mon  == alarmSlots[i].alarmTime.tm_mon  &&                                                        
                 displayTime.tm_mday == alarmSlots[i].alarmTime.tm_mday) {
+                currentUIState = STATE_DEFAULT;
+
+               // currentUIState = STATE_ALARM_ALERT;
         
                 activeToneIndex = alarmSlots[i].chosenAlarm; 
                 isBuzzerActive = true;
@@ -212,23 +219,24 @@ void soundAlarm() {
 }
 
 
+
 void playAlarmSound() {
     static int lastToneIndex = -1;
     static bool wasPlaying = false;
 
-    if (!isBuzzerActive) {
+      if (!isBuzzerActive && !isPreviewActive) {
         if (wasPlaying) {
-        
-            ledcWriteTone(0, 0); 
-            
-        
-            ledcWrite(0, 0); 
-            
+            ledcWriteTone(0, 0);
+            ledcWrite(0, 0);
             wasPlaying = false;
             lastToneIndex = -1;
-          
+        
         }
-        return; 
+        return;
+    }
+
+     if (!isBuzzerActive && isPreviewActive) {
+        activeToneIndex = previewToneIndex;
     }
 
 
@@ -253,13 +261,13 @@ void playAlarmSound() {
                 break;
         }
 
-        if (isBuzzerActive) {
+    
             wasPlaying = true;
             lastToneIndex = activeToneIndex;
         //} else if (isPreviewActive) {
         //    wasPlaying = true;
 
-        }
+     
     }
 }
 
@@ -414,7 +422,8 @@ void alarmData() {
     
     // alarm enabled 
     alarmSlots[activeSlotIndex].isEnabled = true;
-   Serial.println(alarmSlots[activeSlotIndex].alarmTime.tm_hour);
+    Serial.println(alarmSlots[activeSlotIndex].alarmTime.tm_hour);
+    saveSystemSettings();
 
     // clear working data for alarm structs
     editAlarmBuffer = Alarm(); 

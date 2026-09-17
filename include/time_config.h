@@ -5,8 +5,6 @@
 #include <RTClib.h>
 
 extern RTC_DS3231 rtc;
-extern bool dstEnabled;
-extern bool standardFormat;
 
 String dayOfTheWeek(tm& displayTime);
 void writeUserTime(tm userTime);

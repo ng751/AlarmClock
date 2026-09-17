@@ -8,6 +8,7 @@
 #include <display_manager.h>
 #include <alarm.h>
 #include <input_manager.h>
+#include <data_handling.h>
 
 bool dstEnabled = false;
 bool standardFormat = false;
@@ -45,7 +46,7 @@ void rtcFound() {
    }
 }
 
-void formatTime() { //switches between 12 and 24 hours, will take time as argument
+void formatTime() { 
    bool currentButtonState = (digitalRead(INPUTS[BTN_FORMAT].pin) == LOW);
   static bool lastButtonState = false;
   static unsigned long lastDebounceTime = 0;
@@ -60,6 +61,8 @@ void formatTime() { //switches between 12 and 24 hours, will take time as argume
         standardFormat = !standardFormat;
       
         updateDisplayFlag = true; 
+
+        saveSystemSettings();
       }
     }
   }
@@ -106,6 +109,7 @@ void dstConfigure() {
         dstEnabled = !dstEnabled;
       
         updateDisplayFlag = true; 
+        saveSystemSettings();
       }
     }
   }
