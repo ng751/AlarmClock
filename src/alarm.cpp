@@ -10,69 +10,261 @@
 
  int activeSlotIndex = 0;
  bool alarmDateBool = false;
+ bool isBuzzerActive = false;
+ unsigned long buzzerTurnOffTime = 0;
+ bool isIndefiniteAlarm = false;
+ int activeToneIndex = 0;
+ bool wasSnoozePressed = false;
+bool wasStopPressed = false;
+
+const int pwmChannel = 0;    
+const int pwmResolution = 8;  
+
+
+
+int activeMaxSnoozes = 0;      
+int activeSnoozeMinutes = 0;   
+int currentSnoozeCount = 0;  
+
+const unsigned long DURATION_VALUES[] = {
+    900000,   // 15 minutes
+    1800000,  // 30 minutes
+    3600000   // 60 minutes
+};
+
+int configSnoozeMinutes = 5; 
+
+int configMaxSnoozes = 3; 
+
+
+unsigned long snoozeEndTime = 0;
+bool isSnoozing = false;
+
 
  Alarm editAlarmBuffer;
 
- const int buzzer = 10;
 
 const char* alarmTones[] = { "tone 1", "tone 2", "tone 3" };
 int selectedToneIndex = 0; 
     //this can include all 3 different buzzer sounds as well as a switch statement possibly
 
- void snooze() {
-    //this will be responsible for snoozing the buzzer and behaving according to the user set configurations
- }
+void snoozeAndSilence() {
+    unsigned long currentMillis = millis();
 
-void soundAlarm() {
-    static unsigned long lastCheckTime = 0;
-    if (millis() - lastCheckTime < 1000) return; 
-    lastCheckTime = millis();
+    bool isButtonPressed = (digitalRead(INPUTS[BTN_SNOOZE_SILENCE].pin) == LOW);
+    static bool lastButtonState = false;
+    static unsigned long buttonPressedStartTime = 0;
+    static bool holdActionExecuted = false;
 
-    for (int i = 0; i < 3; i++) {
-    
-        if (alarmSlots[i].isEnabled) {  
-    
-            if (displayTime.tm_hour == alarmSlots[i].alarmTime.tm_hour &&
-                displayTime.tm_min  == alarmSlots[i].alarmTime.tm_min && displayTime.tm_sec == alarmSlots[i].alarmTime.tm_sec) {
-                
-                  Serial.println("hello alarm");
-                    playAlarmSound(alarmSlots[i].chosenAlarm); 
-                    break; // Exit loop early once an alarm is triggered
-                }
-            }
-        }
+    bool localSnoozeTriggered = false;
+    bool localStopTriggered = false;
+
+    if (isPreviewActive && (currentMillis >= previewTurnOffTime)) {
+    isPreviewActive = false; // Turn off the preview sound wave generation!
+    Serial.println("Menu preview duration expired. Restoring silence.");
 }
+    
+    if (isButtonPressed && !lastButtonState) {
+        buttonPressedStartTime = currentMillis;
+        holdActionExecuted = false; 
+    }
+
+    
+    if (isButtonPressed && lastButtonState) {
+        if (!holdActionExecuted && (currentMillis - buttonPressedStartTime >= 2000)) {
+            localStopTriggered = true; 
+            holdActionExecuted = true; 
+        }
+    }
+
+  
+    if (!isButtonPressed && lastButtonState) {
+        unsigned long holdDuration = currentMillis - buttonPressedStartTime;
+        if (!holdActionExecuted && (holdDuration >= 50)) { // 50ms noise debounce floor
+            localSnoozeTriggered = true;
+        }
+    }
+    lastButtonState = isButtonPressed; 
+  
+    if ((isBuzzerActive || isSnoozing) && localStopTriggered) {
+        isBuzzerActive = false;
+        isIndefiniteAlarm = false;
+        isSnoozing = false;
+        currentSnoozeCount = 0; 
+        Serial.println("Alarm manually stopped via 2-second hold.");
+        return;
+    }
+
+  
+    if (isBuzzerActive && localSnoozeTriggered) {
+    
+        if (activeMaxSnoozes != 0 && currentSnoozeCount >= activeMaxSnoozes) {
+            isBuzzerActive = false;
+            isIndefiniteAlarm = false;
+            Serial.println("Max snoozes reached for this alarm. Auto-silenced on tap.");
+            return;
+        }
+
+        currentSnoozeCount++; 
+
+        isBuzzerActive = false;
+        isIndefiniteAlarm = false; 
+        
+        
+        snoozeEndTime = currentMillis + ((unsigned long)activeSnoozeMinutes * 60 * 1000); 
+        isSnoozing = true;
+        Serial.print("Alarm snoozed. Current snooze count: ");
+       Serial.println(currentSnoozeCount);
+        return;
+    }
+
+    if (isSnoozing && (currentMillis >= snoozeEndTime)) {
+        isSnoozing = false;
+        isBuzzerActive = true; 
+        Serial.println("Snooze time expired! Alarm ringing again.");
+        
+
+        if (isIndefiniteAlarm) {
+        
+            buzzerTurnOffTime = 0;
+        } else {
+    
+            buzzerTurnOffTime = currentMillis + DURATION_VALUES[activeSlotIndex];
+        }
+        return;
+    }
 
 
- void silence() {
-    //this will silence the buzzer altogether
- }
+    if (isIndefiniteAlarm) return; 
 
- void playAlarmSound(int toneIndex) {
-    switch (toneIndex) {
-        case 0:
-            tone(buzzer, 1000);
-            delay(1000);
-            noTone(buzzer);
-            break;
-            
-        case 1:
-            tone(buzzer, 500);
-            delay(1000);
-            noTone(buzzer);
-            break;
-            
-        case 2:
-            tone(buzzer, 300);
-            delay(1000);
-            noTone(buzzer);
-      
-            break;
-            
-        default:
-            break;
+    if (isBuzzerActive && (currentMillis >= buzzerTurnOffTime)) {
+        isBuzzerActive = false; // Automatically shut off because user-configured time ran out
+        Serial.println("Alarm auto-silenced after continuous sound limit.");
     }
 }
+
+void soundAlarm() {
+    if (isBuzzerActive || isSnoozing) return;
+
+    static unsigned long lastCheckTime = 0;
+    if (millis() - lastCheckTime < 1000) return;
+    lastCheckTime = millis();
+
+    if (currentUIState == STATE_SCROLL_MENU) return;
+
+    for (int i = 0; i < 3; i++) {
+        if (alarmSlots[i].isEnabled && !alarmSlots[i].isDaily) {
+            if (displayTime.tm_hour == alarmSlots[i].alarmTime.tm_hour &&
+                displayTime.tm_min  == alarmSlots[i].alarmTime.tm_min  &&
+                displayTime.tm_sec  == alarmSlots[i].alarmTime.tm_sec) {
+        
+                activeToneIndex = alarmSlots[i].chosenAlarm; 
+                isBuzzerActive = true;
+            
+                currentSnoozeCount = 0; 
+
+              
+                activeMaxSnoozes = alarmSlots[i].snoozesBeforeSilence;
+                activeSnoozeMinutes = alarmSlots[i].snoozeDelay;
+
+                int slotDurationChoice = alarmSlots[i].timeUntilSilence;
+                if (slotDurationChoice == 3) {
+                    isIndefiniteAlarm = true; 
+                    buzzerTurnOffTime = 0; 
+                } else {
+                    isIndefiniteAlarm = false;
+                    buzzerTurnOffTime = millis() + DURATION_VALUES[slotDurationChoice]; 
+                }
+                break;
+            }
+        }
+        else if (alarmSlots[i].isEnabled && alarmSlots[i].isDaily) {
+            if (displayTime.tm_hour == alarmSlots[i].alarmTime.tm_hour &&
+                displayTime.tm_min  == alarmSlots[i].alarmTime.tm_min  &&
+                displayTime.tm_sec  == alarmSlots[i].alarmTime.tm_sec  &&
+                displayTime.tm_year == alarmSlots[i].alarmTime.tm_year &&                                                     
+                displayTime.tm_mon  == alarmSlots[i].alarmTime.tm_mon  &&                                                        
+                displayTime.tm_mday == alarmSlots[i].alarmTime.tm_mday) {
+        
+                activeToneIndex = alarmSlots[i].chosenAlarm; 
+                isBuzzerActive = true;
+            
+                currentSnoozeCount = 0; 
+
+              
+                activeMaxSnoozes = alarmSlots[i].snoozesBeforeSilence;
+                activeSnoozeMinutes = alarmSlots[i].snoozeDelay;
+
+                int slotDurationChoice = alarmSlots[i].timeUntilSilence;
+                 Serial.println("time till silence");
+                Serial.println(alarmSlots[i].timeUntilSilence);
+                if (slotDurationChoice == 0) {
+                    isIndefiniteAlarm = true; 
+                    buzzerTurnOffTime = 0; 
+                } else {
+                    isIndefiniteAlarm = false;
+                    buzzerTurnOffTime = millis() + DURATION_VALUES[slotDurationChoice]; 
+                }
+                break;
+            }
+        }
+
+    }
+}
+
+
+void playAlarmSound() {
+    static int lastToneIndex = -1;
+    static bool wasPlaying = false;
+
+    if (!isBuzzerActive) {
+        if (wasPlaying) {
+        
+            ledcWriteTone(0, 0); 
+            
+        
+            ledcWrite(0, 0); 
+            
+            wasPlaying = false;
+            lastToneIndex = -1;
+            Serial.println("Hardware registers forcefully cleared to 0.");
+        }
+        return; 
+    }
+
+
+    if (!wasPlaying || activeToneIndex != lastToneIndex) {
+        switch (activeToneIndex) {
+            case 0:
+                ledcWriteTone(0, 1000); 
+                ledcWrite(0, 127);      
+                break;
+            case 1:
+                ledcWriteTone(0, 600);  
+                ledcWrite(0, 127);
+                break;
+            case 2:
+                ledcWriteTone(0, 300);  
+                ledcWrite(0, 127);
+                break;
+            default:
+                ledcWriteTone(0, 0);
+                ledcWrite(0, 0);
+                wasPlaying = false;
+                break;
+        }
+
+        if (isBuzzerActive) {
+            wasPlaying = true;
+            lastToneIndex = activeToneIndex;
+        //} else if (isPreviewActive) {
+        //    wasPlaying = true;
+
+        }
+    }
+}
+
+
 
  
 void setAlarm() {
@@ -185,8 +377,10 @@ void alarmData() {
     Serial.println("alarm date bool");
         if (!alarmDateBool) {
             currentUIState = STATE_EDIT_SELECTALARM; 
+            editAlarmBuffer.isDaily = false;
         } else {
             currentUIState = STATE_EDIT_YEAR;
+            editAlarmBuffer.isDaily = true;
         }
         break;
         
@@ -202,6 +396,7 @@ void alarmData() {
         currentUIState = STATE_EDIT_SELECTALARM;
         break;
     case STATE_EDIT_SELECTALARM:
+        editAlarmBuffer.snoozeDelay = 5;
         currentUIState = STATE_EDIT_SNOOZEDELAY;
         break;
         
@@ -220,7 +415,7 @@ void alarmData() {
     
     // alarm enabled 
     alarmSlots[activeSlotIndex].isEnabled = true;
-    Serial.println(alarmSlots[activeSlotIndex].alarmTime.tm_hour);
+   Serial.println(alarmSlots[activeSlotIndex].alarmTime.tm_hour);
 
     // clear working data for alarm structs
     editAlarmBuffer = Alarm(); 

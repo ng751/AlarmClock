@@ -1,0 +1,92 @@
+ //void snooze() {
+    //this will be responsible for snoozing the buzzer and behaving according to the user set configurations
+ //}
+//  bool checkDismissButton() {
+//     // Read the button pin. Assumes INPUT_PULLUP wiring (LOW when pressed)
+//     if (digitalRead(INPUTS[BTN_SNOOZE_SILENCE].pin) == LOW) {
+//         delay(50); // Simple debounce delay to prevent double-clicks
+//         return true;
+//     }
+//     return false;
+// }
+
+
+// void updateBuzzerState() {
+//     unsigned long currentMillis = millis();
+
+//     // This handles both the preview timeout and the real alarm timeout!
+//     if (isBuzzerActive && (currentMillis >= buzzerTurnOffTime)) {
+//         isBuzzerActive = false; // Turn the buzzer system OFF
+        
+//         if (currentUIState == STATE_ALARM_SOUNDING) {
+//             currentUIState = STATE_DEFAULT; 
+//         }
+//     }
+// }
+
+
+// void soundAlarm() {
+//     static unsigned long lastCheckTime = 0;
+    
+//     // 1. SAFETY: Only check the time once per second so it doesn't trigger 
+//     // a single alarm thousands of times in a row during that same second.
+//     if (millis() - lastCheckTime < 1000) return;
+//     lastCheckTime = millis();
+
+//     // 2. SAFETY: Don't sound a real alarm if the user is in the middle of 
+//     // editing or scrolling through settings menus.
+//     if (currentUIState == STATE_EDIT_SELECTALARM) return;
+
+//     // 3. CHECK THE CLOCK: Loop through your 3 alarm slots
+//     for (int i = 0; i < 3; i++) {
+//         if (alarmSlots[i].isEnabled) {
+//             // Check if current system time matches this specific alarm slot's set time
+//             if (displayTime.tm_hour == alarmSlots[i].alarmTime.tm_hour &&
+//                 displayTime.tm_min  == alarmSlots[i].alarmTime.tm_min  &&
+//                 displayTime.tm_sec  == alarmSlots[i].alarmTime.tm_sec) {
+                
+//                 // Change UI state to the alarm sounding screen
+//                 currentUIState = STATE_ALARM_SOUNDING;
+                
+//                 // --- SCHEDULE THE BUZZER STATE ---
+//                 // Set the tone index assigned to this specific alarm slot
+//                 activeToneIndex = alarmSlots[i].chosenAlarm; 
+                
+//                 // Schedule the shutdown using your user's custom configuration variable!
+//                 buzzerTurnOffTime = millis() + 20000;
+                
+//                 // Turn the buzzer flag on
+//                 isBuzzerActive = true;
+                
+//                 break; // Exit the loop early since an alarm has been triggered
+//             }
+//         }
+//     }
+// }
+
+ Pass the index, the duration in milliseconds, and a trigger to start i
+
+// Pass the index, the duration in milliseconds, and a trigger to start it
+// void playAlarmSound(int toneIndex, unsigned long duration, bool trigger) {
+//   static bool isTonePlaying = false;
+//   if (!trigger) {
+//         noTone(buzzer);
+//         return;
+//     }
+
+//   // 1. Start the tone ONLY when the trigger is true and no tone is currently playing
+//   if (trigger && !isTonePlaying) {
+//     isTonePlaying = true;
+
+//     switch (toneIndex) {
+//       case 0: tone(buzzer, 1000); break;
+//       case 1: tone(buzzer, 500);  break;
+//       case 2: tone(buzzer, 300);  break;
+//       default: noTone(buzzer); isTonePlaying = false; break;
+//     }
+//   }
+
+//   // 2. Automatically turn off the buzzer after the duration has passed
+ 
+// }
+

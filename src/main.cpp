@@ -25,14 +25,18 @@ void setup() {
 
     initInputManager(); // initiate each input
 
-    encoderInit(); // read the current rotary encoder value to set up the encoderDirection function
-
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
+
+    ledcSetup(0, 2000, 8);
+
+    ledcAttachPin(buzzer, 0); // 1000Hz base pitch, 8-bit depth
+    
+    // Set duty cycle to 0% so it stays completely silent on startup
+    ledcWrite(0, 0); 
 
 
     rtcFound();
 
-    pinMode(10, OUTPUT);
 
     delay(1000);
 
@@ -70,6 +74,12 @@ void loop() {
     formatTime();
 
     soundAlarm();
+
+    //updateBuzzerState();
+
+    playAlarmSound();
+
+    snoozeAndSilence();
 
     setAlarm();
 

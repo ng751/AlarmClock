@@ -12,8 +12,13 @@ enum InputIndex {
     ENCODER_SWITCH,
     ENCODER_CLK,
     ENCODER_DT,
-    NUM_INPUTS  // Equal to 5
+    NUM_INPUTS  // Equal to ...
 };
+
+ const int buzzer = 4;
+
+ 
+
 
 // Structure that maps an input to a pin number
 struct InputMap {
@@ -35,10 +40,8 @@ inline constexpr InputMap INPUTS[NUM_INPUTS] = {
 
 void initInputManager();
 bool inputPressed(InputIndex btn);
-void encoderInit();
 void encoderDirection();
 void encoderSwitch();
-//int retrieveEncoderDirection();
 void automaticDimming();
 
 
