@@ -61,7 +61,7 @@ void snoozeAndSilence() {
 
     if (isPreviewActive && (currentMillis >= previewTurnOffTime)) {
     isPreviewActive = false; // Turn off the preview sound wave generation!
-    Serial.println("Menu preview duration expired. Restoring silence.");
+    Serial.println("silence");
 }
     
     if (isButtonPressed && !lastButtonState) {
@@ -91,7 +91,6 @@ void snoozeAndSilence() {
         isIndefiniteAlarm = false;
         isSnoozing = false;
         currentSnoozeCount = 0; 
-        Serial.println("Alarm manually stopped via 2-second hold.");
         return;
     }
 
@@ -101,7 +100,7 @@ void snoozeAndSilence() {
         if (activeMaxSnoozes != 0 && currentSnoozeCount >= activeMaxSnoozes) {
             isBuzzerActive = false;
             isIndefiniteAlarm = false;
-            Serial.println("Max snoozes reached for this alarm. Auto-silenced on tap.");
+    
             return;
         }
 
@@ -113,7 +112,7 @@ void snoozeAndSilence() {
         
         snoozeEndTime = currentMillis + ((unsigned long)activeSnoozeMinutes * 60 * 1000); 
         isSnoozing = true;
-        Serial.print("Alarm snoozed. Current snooze count: ");
+
        Serial.println(currentSnoozeCount);
         return;
     }
@@ -121,7 +120,7 @@ void snoozeAndSilence() {
     if (isSnoozing && (currentMillis >= snoozeEndTime)) {
         isSnoozing = false;
         isBuzzerActive = true; 
-        Serial.println("Snooze time expired! Alarm ringing again.");
+
         
 
         if (isIndefiniteAlarm) {
@@ -139,7 +138,7 @@ void snoozeAndSilence() {
 
     if (isBuzzerActive && (currentMillis >= buzzerTurnOffTime)) {
         isBuzzerActive = false; // Automatically shut off because user-configured time ran out
-        Serial.println("Alarm auto-silenced after continuous sound limit.");
+    
     }
 }
 
@@ -227,7 +226,7 @@ void playAlarmSound() {
             
             wasPlaying = false;
             lastToneIndex = -1;
-            Serial.println("Hardware registers forcefully cleared to 0.");
+          
         }
         return; 
     }
@@ -420,7 +419,7 @@ void alarmData() {
     // clear working data for alarm structs
     editAlarmBuffer = Alarm(); 
 
-    Serial.print("Alarm configuration saved cleanly to slot: ");
+    
     Serial.println(activeSlotIndex);
 
     // no longer editing and return to display
