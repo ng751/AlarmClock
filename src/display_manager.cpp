@@ -16,11 +16,11 @@
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
-
 tm displayTime = systemTime;
 bool updateDisplayFlag = false;
+
 elapsedMillis sinceLastFlicker;
-elapsedMillis flickerDuration;
+
 bool displayIsFlickering;
 bool displayOn;
 int maxFlickerTime;
@@ -218,60 +218,53 @@ void updateDisplay() {
   updateDisplayFlag = false; 
 }
 
-void displayDim(bool dimFurther, bool isManual) { //prototype for the dimming featur
+void displayDim(bool dimFurther, bool isManual) { 
    oldState = dimState;
 
    if (isManual) {
     if (dimFurther) {
       dimState++; 
-      if (dimState > 2) dimState = 2; // off stays off
+      if (dimState > 2) dimState = 2; // Off stays off.
     } else {
       dimState--;
-      if (dimState < 0) dimState = 0; // max stays max
+      if (dimState < 0) dimState = 0; // Max stays max.
     }
   } 
   else {
     if (dimState != 2) { 
       if (dimFurther) {
-        dimState = 1; // if photoresistor is dark then dim
+        dimState = 1; // If photoresistor is reading the dim threshold then dim.
       } else {
-        dimState = 0; // if photoresistor says its light then illuminate
+        dimState = 0; // If photoresistor is reading the illuminate threshold then illuminate.
       }
     }
   }
 
-  // only change if dimstate and oldstate are different, suggests user has turned the knob
+  // Only changes if dimState and oldState are different, suggesting that the user has turned the knob.
   if (dimState != oldState) {
     switch (dimState) {
       
-      case 0: // DIMMED to FULLY ILLUMINATED
-        display.ssd1306_command(SSD1306_DISPLAYON);     // ensure screen is on
+      case 0: // Dimmed to fully illuminate.
+        display.ssd1306_command(SSD1306_DISPLAYON);      // Turn screen on.
         display.ssd1306_command(SSD1306_SETCONTRAST); 
-        display.ssd1306_command(255);                    // max brightness
+        display.ssd1306_command(255);                    // Set display to max brightness.
         Serial.println("State 0: Fully Illuminated");
         break;
 
-      case 1: // Moving from either off or fully illuminated into dim
-        display.ssd1306_command(SSD1306_DISPLAYON);     // turn display back on if off
+      case 1: // Moving from either off or fully illuminated into dim.
+        display.ssd1306_command(SSD1306_DISPLAYON);      // Turn screen on.
         display.ssd1306_command(SSD1306_SETCONTRAST); 
-        display.ssd1306_command(1);                      // dimmed
+        display.ssd1306_command(1);                      // Dim the display.
         Serial.println("State 1: Dimmed");
         break;
 
-      case 2: // DIMMED to OFF
-        display.ssd1306_command(SSD1306_DISPLAYOFF);    // sleep mode
+      case 2: // Dimmed to off.
+        display.ssd1306_command(SSD1306_DISPLAYOFF); // Display turns off for a "sleep mode".
         Serial.println("State 2: Off");
         break;
     }
   }
     
-}
-
-void activateFlicker(int flickerTime){
-  maxFlickerTime = flickerTime;
-  flickerDuration = 0;
-  sinceLastFlicker = 0;
-  displayIsFlickering = true;
 }
 
 void flickerDisplay() {
@@ -303,16 +296,16 @@ void flickerDisplay() {
 
     for (int i = 0; i < 3; i++) {
         char slotText[24];
-        int yPosition = 16 + (i * 12); // stack rows neatly down the screen (Y: 16, 28, 40)
+        int yPosition = 16 + (i * 12); // Stack rows neatly down the screen (Y: 16, 28, 40).
 
-        // draw a selection arrow '>' only next to the active scroll position
+        // Draw a selection arrow '>' only next to the active scroll position.
         if (i == currentMenuScrollPosition) {
             displayString(">", 1, 0, yPosition, false);
         } else {
             displayString(" ", 1, 0, yPosition, false);
         }
 
-        // format the text depending on whether the alarm is set or empty
+        // Format the alarm clock slot according to whether its empty or configured and daily or not daily.
         if (alarmSlots[i].isEnabled && !alarmSlots[i].isDaily) {
            // if active, print the saved time configuration 
             snprintf(slotText, sizeof(slotText), "Alm %d: %02d:%02d", 
@@ -328,33 +321,12 @@ void flickerDisplay() {
                     alarmSlots[i].alarmTime.tm_mday,     
                     alarmSlots[i].alarmTime.tm_year % 100); 
         } else {
-            // if unconfigured or overwritten, show an empty placeholder slot
+            // If empty, show a placeholder slot.
             snprintf(slotText, sizeof(slotText), "Alm %d: --:-- [EMPTY]", i + 1);
         }
 
-        // output the slot details string to the screen buffer
         displayString(slotText, 1, 8, yPosition, false);
     }
 
 }
 
-void snoozeDisplay() {
-  // display.invertDisplay(false); 
-
-  //       displayString("Snoozing... zZz", 1, 20, 10, false);
-
-  //       // Compute the minutes and seconds remaining on your snoozeEndTime timeline
-  //       unsigned long currentMillis = millis();
-  //       unsigned long remainingSecs = 0;
-  //       if (snoozeEndTime > currentMillis) {
-  //           remainingSecs = (snoozeEndTime - currentMillis) / 1000;
-  //       }
-  //       unsigned long displayMins = remainingSecs / 60;
-  //       unsigned long displaySecs = remainingSecs % 60;
-
-  //       // Render a countdown time look using your exact string framework
-  //       snprintf(alertBuffer, sizeof(alertBuffer), "%02lu:%02lu", displayMins, displaySecs);
-  //       displayString(alertBuffer, 2, 35, 28, false);
-
-  //       displayString("Tap again to Snooze", 1, 10, 52, false);
-}

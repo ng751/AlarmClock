@@ -14,92 +14,65 @@ RTC_DS3231 rtc;
 tm editBuffer;
 tm systemTime;
 
-
 #define I2C_SDA_PIN 8
 #define I2C_SCL_PIN 9
 
 void setup() {
     Serial.begin(115200);
-    loadSystemSettings();
 
-   // delay(200);
+    loadSystemSettings(); // Load the saved system configurations set by the user.
 
-    initInputManager(); // initiate each input
+    initInputManager(); // Initiate all assigned user inputs.
 
-    Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
+    Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN); // Initialize I2C communication for assigned pins.
 
-    ledcSetup(0, 2000, 8);
+    ledcSetup(0, 2000, 8); // "Open" LEDC Channel 0 for configuration, 2k Hz @ 8-bit depth.
 
-    ledcAttachPin(buzzer, 0); // 1000Hz base pitch, 8-bit depth
+    ledcAttachPin(buzzer, 0); // Map the GPIO pin assigned to the buzzer to LEDC Channel 0.
     
-    // Set duty cycle to 0% so it stays completely silent on startup
-    ledcWrite(0, 0); 
+    ledcWrite(0, 0); // Set duty cycle to 0% so it stays completely silent on startup.
 
+    rtcFound(); // Verify that the RTC exists.
 
-    rtcFound();
-
-
-    delay(1000);
-
-    displayFound(); // check to make sure the display exists
-
-
-    //attachInterrupt(digitalPinToInterrupt(ENCODER_CLK), encoderDirection, CHANGE); //these are meant to interrupt whatever function is running if a change is detected. 
-    //attachInterrupt(digitalPinToInterrupt(ENCODER_DT), encoderDirection, CHANGE);  dont think its needed but keeping for now
+    displayFound(); // Verify that the display exists.
     
+    displayClear(); // Clear the display.
 
-    displayClear(); // clear the display
+    clockUpdate(); // Initial clock update that writes the values upon startup.
 
-    clockUpdate(); //MUST ALWAYS RUN 
-    updateDisplay();  
-
-    //activateFlicker(10000);
-
-    //writeUserTime();
-
-    //delay(200);
-
+    updateDisplay(); // Initial updateDisplay call that updates the display upon startup.
 
 }   
 
 void loop() {
 
-    automaticDimming(); // function that handles automatic dimming; always checking for change in input
+    automaticDimming(); // Handles automatic dimming using photoresistor data.
 
-    encoderDirection(); // if menu selection is taking place, the argument will be true and the encoder will act differently. no conditional yet so just false for now
+    encoderDirection(); // Handles the rotary encoder dial input according to the UI state.
 
-    encoderSwitch();
+    encoderSwitch(); // Handles the rotary encoder switch input according to the UI state; also allows user to edit display date/time.
 
-    dstConfigure();
+    dstConfigure(); // Toggles the display time between DST and no DST.
 
-    formatTime();
+    formatTime(); // Toggles the display time between 12 and 24 hour format mode.
 
-    soundAlarm();
+    soundAlarm(); // Iterates through user-set alarms and checks whether any of the configured times agree with the display time; if yes, then the alarm is sounded.
 
-    //updateBuzzerState();
+    playAlarmSound(); // Contains a switch statement of tones that the user is able to choose from; handles everything related to the Piezo buzzer.
 
-    playAlarmSound();
+    snoozeAndSilence(); // Handles the snooze and silence logic for the alarms. 
 
-    snoozeAndSilence();
+    setAlarm(); // Allows the user to configure 3 different alarms, including snooze configurations for each.
 
-    setAlarm();
-
-
-    //flickerDisplay();
-
-
-   if (inputPressed(BTN_RST)) { //implement debounce for inputs where needed
+   if (inputPressed(BTN_RST)) { // Allows the user to restart the ESP32.
         displayString("Restarting", 1, 0, 0, true);
         ESP.restart();
-    } else if (inputPressed(BTN_SNOOZE_SILENCE)) {
-        displayString("Snooze/Silence Button", 1, 0, 0, true);
-
-        //rtc1.adjust(writeUserTime());
-    
     } else {
-        //do nothing for now
+        // Do nothing.
     }
-    clockUpdate(); //MUST ALWAYS RUN 
-    updateDisplay();  
+
+    clockUpdate(); // Function that updates the clock display via the RTC. Must always run.
+
+    updateDisplay(); // Function that continuously updates the display using a flag variable.
 
 }

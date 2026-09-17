@@ -19,17 +19,11 @@ enum UIState { //enum that describes every possible state in which the alarm clo
     STATE_EDIT_MINUTES,
     STATE_EDIT_SECONDS,
     STATE_EDIT_AMPM,
-    STATE_EDIT_SNOOZEDELAY, //snooze delay
-    STATE_EDIT_SNOOZESBEFORESILENCE, //amount of times alarm can be snoozed before it silences
-    STATE_EDIT_TIMEUNTILSILENCE, //how long an alarm will sound before silenced
-    STATE_ALARM_SOUNDING,
-    STATE_ALARM_SNOOZING,
+    STATE_EDIT_SNOOZEDELAY, // Time between snoozes.
+    STATE_EDIT_SNOOZESBEFORESILENCE, // Amount of times alarm can be snoozed before it silences.
+    STATE_EDIT_TIMEUNTILSILENCE, // How long an alarm will sound before it silences.
     STATE_EDIT_ALARMDATEBOOL,
     STATE_EDIT_SELECTALARM,
-    STATE_ALARM_ALERT
-
-
-
 };
 
 extern int currentMenuScrollPosition;
@@ -42,11 +36,10 @@ bool displayFound();
 void displayString(String message, int textSize, int cursorX, int cursorY, bool clearDisplay); 
 void displayClear();
 void displayDim(bool dim, bool isManual);
-void activateFlicker(int flickerTime);
 void flickerDisplay();
 void updateDisplay();
 void drawAlarmMenu();
-void snoozeDisplay();
+
 extern tm displayTime;
 
 //add function to display a selectable list with arguments that include # of items and the list of items 

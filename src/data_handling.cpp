@@ -4,7 +4,7 @@
 
 static Preferences prefs;
 
-void saveSystemSettings() {
+void saveSystemSettings() { // Save all of the user configured data to the non-volatile storage.
     prefs.begin("clockSettings", false);
     prefs.putBool("timeFormat", standardFormat);
     prefs.putBytes("alarms", &alarmSlots, sizeof(alarmSlots));
@@ -12,7 +12,7 @@ void saveSystemSettings() {
     Serial.println("alarm configurations saved");
 }
 
-void loadSystemSettings() {
+void loadSystemSettings() { // Load all of the saved user configurations.
     prefs.begin("clockSettings", true);
     standardFormat = prefs.getBool("timeFormat", true);
 

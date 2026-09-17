@@ -13,7 +13,7 @@
 bool dstEnabled = false;
 bool standardFormat = false;
 
-String dayOfTheWeek(tm& displayTime) {
+String dayOfTheWeek(tm& displayTime) { // Algorithm that returns a day of the week given a date and time.
     switch (displayTime.tm_wday) {
         case 0: return "Sun";
         case 1: return "Mon";
@@ -41,8 +41,8 @@ void writeUserTime(tm userTime) {
 void rtcFound() {
    if (! rtc.begin()) {
     Serial.println("RTC not found");
-    Serial.flush();
-    for (;;); // Infinitely loop if rtc is not found
+    Serial.flush(); // Clear the terminal
+    for (;;); // Infinitely loop if RTC is not found
    }
 }
 
@@ -80,7 +80,7 @@ void clockUpdate() {
     if (now.second() != lastSecond) {
       lastSecond = now.second();
 
-      // global systemTime is updated to reflect rtc data
+      // Alarm clock's system time changes to reflect RTC data.
       systemTime.tm_sec  = now.second();
       systemTime.tm_min  = now.minute();
       systemTime.tm_hour = now.hour();
@@ -88,8 +88,7 @@ void clockUpdate() {
       systemTime.tm_mon  = now.month() - 1;   
       systemTime.tm_year = now.year() - 1900; 
 
-      // update display to reflect correct time
-      updateDisplayFlag = true; 
+      updateDisplayFlag = true; // Update display to reflect change in time.
     }
   }
 }
@@ -104,7 +103,7 @@ void dstConfigure() {
     if (millis() - lastDebounceTime > debounceDelay) {
       lastDebounceTime = millis();
 
-      if (currentUIState == STATE_DEFAULT) {
+      if (currentUIState == STATE_DEFAULT) { // Only allow the DST to be configured if the user is on the main display screen
       
         dstEnabled = !dstEnabled;
       

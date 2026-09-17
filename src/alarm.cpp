@@ -19,13 +19,11 @@
 const int pwmChannel = 0;    
 const int pwmResolution = 8;  
 
-
-
 int activeMaxSnoozes = 0;      
 int activeSnoozeMinutes = 0;   
 int currentSnoozeCount = 0;  
 
-const unsigned long DURATION_VALUES[] = {
+const unsigned long DURATION_VALUES[] = { // "Time until silence" values in milliseconds.
     900000,   // 15 minutes
     1800000,  // 30 minutes
     3600000   // 60 minutes
@@ -35,13 +33,10 @@ int configSnoozeMinutes = 5;
 
 int configMaxSnoozes = 3; 
 
-
 unsigned long snoozeEndTime = 0;
 bool isSnoozing = false;
 
-
 Alarm editAlarmBuffer;
-
 
 const char* alarmTones[] = { "tone 1", "tone 2", "tone 3" };
 
@@ -59,7 +54,7 @@ void snoozeAndSilence() {
     bool localStopTriggered = false;
 
     if (isPreviewActive && (currentMillis >= previewTurnOffTime)) {
-    isPreviewActive = false; // Turn off the preview sound wave generation!
+    isPreviewActive = false; 
     Serial.println("silence");
     }   
     
@@ -153,14 +148,12 @@ void soundAlarm() {
     if (currentUIState == STATE_SCROLL_MENU) return;
 
     for (int i = 0; i < 3; i++) {
-        if (alarmSlots[i].isEnabled && !alarmSlots[i].isDaily) {
+        if (alarmSlots[i].isEnabled && !alarmSlots[i].isDaily) { // If it's strictly a "time" alarm, only make sure time values agree.
             if (displayTime.tm_hour == alarmSlots[i].alarmTime.tm_hour &&
                 displayTime.tm_min  == alarmSlots[i].alarmTime.tm_min  &&
                 displayTime.tm_sec  == alarmSlots[i].alarmTime.tm_sec) {
                 currentUIState = STATE_DEFAULT;
 
-              //  currentUIState = STATE_ALARM_ALERT;
-        
                 activeToneIndex = alarmSlots[i].chosenAlarm; 
                 isBuzzerActive = true;
             
@@ -181,16 +174,15 @@ void soundAlarm() {
                 break;
             }
         }
-        else if (alarmSlots[i].isEnabled && alarmSlots[i].isDaily) {
+        else if (alarmSlots[i].isEnabled && alarmSlots[i].isDaily) { // If it's a daily alarm, make sure the date values agree too.
             if (displayTime.tm_hour == alarmSlots[i].alarmTime.tm_hour &&
                 displayTime.tm_min  == alarmSlots[i].alarmTime.tm_min  &&
                 displayTime.tm_sec  == alarmSlots[i].alarmTime.tm_sec  &&
                 displayTime.tm_year == alarmSlots[i].alarmTime.tm_year &&                                                     
                 displayTime.tm_mon  == alarmSlots[i].alarmTime.tm_mon  &&                                                        
                 displayTime.tm_mday == alarmSlots[i].alarmTime.tm_mday) {
-                currentUIState = STATE_DEFAULT;
 
-               // currentUIState = STATE_ALARM_ALERT;
+                currentUIState = STATE_DEFAULT;
         
                 activeToneIndex = alarmSlots[i].chosenAlarm; 
                 isBuzzerActive = true;
@@ -218,10 +210,9 @@ void soundAlarm() {
     }
 }
 
-
-
 void playAlarmSound() {
-    static int lastToneIndex = -1;
+
+    static int lastToneIndex = -1; // Reset lastToneIndex using '-1' so it doesnt stay at 0 if set to 0.
     static bool wasPlaying = false;
 
       if (!isBuzzerActive && !isPreviewActive) {
@@ -240,22 +231,22 @@ void playAlarmSound() {
     }
 
 
-    if (!wasPlaying || activeToneIndex != lastToneIndex) {
+    if (!wasPlaying || activeToneIndex != lastToneIndex) { // Ensures sure that two alarms cannot overlap
         switch (activeToneIndex) {
             case 0:
-                ledcWriteTone(0, 1000); 
-                ledcWrite(0, 127);      
+                ledcWriteTone(0, 1000); // Set PWM Channel 0 to 1k Hz.
+                ledcWrite(0, 127); // Set duty cycle to 50%.    
                 break;
             case 1:
-                ledcWriteTone(0, 600);  
+                ledcWriteTone(0, 600); // Set PWM Channel 0 to 600 Hz.
                 ledcWrite(0, 127);
                 break;
             case 2:
-                ledcWriteTone(0, 300);  
+                ledcWriteTone(0, 300); // Set PWM Channel 0 to 300 Hz.
                 ledcWrite(0, 127);
                 break;
             default:
-                ledcWriteTone(0, 0);
+                ledcWriteTone(0, 0); // // Set PWM Channel 0 to 0 Hz.
                 ledcWrite(0, 0);
                 wasPlaying = false;
                 break;
@@ -264,16 +255,11 @@ void playAlarmSound() {
     
             wasPlaying = true;
             lastToneIndex = activeToneIndex;
-        //} else if (isPreviewActive) {
-        //    wasPlaying = true;
 
      
     }
 }
 
-
-
- 
 void setAlarm() {
   bool currentButtonState = (digitalRead(INPUTS[BTN_SET_ALARM].pin) == LOW);
   static bool lastButtonState = false;
@@ -303,11 +289,9 @@ void setAlarm() {
   lastButtonState = currentButtonState;
 }
 
- void changeDateTime() {
+ void changeDateTime() { // Contains a switch statement that the user goes through sequentially when changing the date and time.
 
-  
-
-    Serial.println("in changedatetime");
+    Serial.println("In menu: Change date and time.");
 
     switch (currentUIState) {
 
@@ -332,8 +316,7 @@ void setAlarm() {
       break;
 
     case STATE_EDIT_MINUTES:
-    
-     
+
       currentUIState = STATE_EDIT_SECONDS;
       break;
     case STATE_EDIT_SECONDS:
@@ -344,12 +327,6 @@ void setAlarm() {
 
       writeUserTime(systemTime);
 
-     // Serial.println("Time and date saved:");
-     // Serial.print("Year: ");  Serial.println(systemTime.tm_year + 1900);
-     // Serial.print("Month: "); Serial.println(systemTime.tm_mon + 1);
-    //  Serial.print("Day: ");   Serial.println(systemTime.tm_mday);
-      //Serial.print("Hour: ");  Serial.println(systemTime.tm_hour);
-     // Serial.print("Min: ");   Serial.println(systemTime.tm_min);
      currentUIState = STATE_DEFAULT; // automatically return to the main screen
      break;
     }
@@ -357,10 +334,9 @@ void setAlarm() {
     // alert the system that the UI state changed and the display needs to reflect the new field
   }
 
-void alarmData() {
+void alarmData() { // Contains a switch statement that the user goes through sequentially when configuring an alarm; includes a path for if the user wants to include a date component.
 
-    Serial.println("in alarmData");
-
+  Serial.println("In menu: Configure an alarm.");
 
   switch (currentUIState) {
     case STATE_SCROLL_MENU:
@@ -376,12 +352,11 @@ void alarmData() {
         currentUIState = STATE_EDIT_SECONDS;
         break;
     case STATE_EDIT_SECONDS:
-    Serial.println("edit seconds");
         currentUIState = STATE_EDIT_ALARMDATEBOOL;
         break;
         
     case STATE_EDIT_ALARMDATEBOOL:
-    Serial.println("alarm date bool");
+        Serial.println("Add a date component to the alarm?");
         if (!alarmDateBool) {
             currentUIState = STATE_EDIT_SELECTALARM; 
             editAlarmBuffer.isDaily = false;
@@ -403,7 +378,7 @@ void alarmData() {
         currentUIState = STATE_EDIT_SELECTALARM;
         break;
     case STATE_EDIT_SELECTALARM:
-        editAlarmBuffer.snoozeDelay = 5;
+        editAlarmBuffer.snoozeDelay = 5; // Snooze delay must start at 5.
         currentUIState = STATE_EDIT_SNOOZEDELAY;
         break;
         
@@ -416,22 +391,19 @@ void alarmData() {
         break;
         
     case STATE_EDIT_TIMEUNTILSILENCE:
-    //create new alarm
-        alarmSlots[activeSlotIndex] = editAlarmBuffer;
-        alarmSlots[activeSlotIndex].alarmTime = editBuffer;
+        
+    // Save the user configured alarm settings to the designated alarm slot.
+    alarmSlots[activeSlotIndex] = editAlarmBuffer;
+    alarmSlots[activeSlotIndex].alarmTime = editBuffer;
     
-    // alarm enabled 
+    // Enable the newly configured alarm and save it to the system's non-volatile storage.
     alarmSlots[activeSlotIndex].isEnabled = true;
-    Serial.println(alarmSlots[activeSlotIndex].alarmTime.tm_hour);
     saveSystemSettings();
 
-    // clear working data for alarm structs
+    // Clear the buffer data for the next alarm.
     editAlarmBuffer = Alarm(); 
 
-    
-    Serial.println(activeSlotIndex);
-
-    // no longer editing and return to display
+    // Return to the display when done configuring the alarm.
     isEditingAlarm = false;
     currentUIState = STATE_DEFAULT;
         break;

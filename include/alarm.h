@@ -9,7 +9,7 @@ extern tm editBuffer;
 
 extern int activeSlotIndex; 
 
- extern bool isIndefiniteAlarm;
+extern bool isIndefiniteAlarm;
 
 extern int snoozeDelay;
 extern int snoozesBeforeSilence;
@@ -33,7 +33,6 @@ extern int currentSnoozeCount;
 extern bool alarmDateBool; 
 
 extern const char* alarmTones[3];
-
 
 void buzzerSound();
 void snoozeAndSilence();
